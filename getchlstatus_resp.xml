@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<bts version="1.0">
+    <cmd>getchlstatus_resp</cmd>
+    <list count = "11">
+        <status ip="127.0.0.1" devtype="22" devid="3" subdevid="2" chlid="8">working </status >
+        <status ip="127.0.0.1" devtype="22" devid="3" subdevid="1" chlid="6">stop</status >
+        <status ip="127.0.0.1" devtype="22" devid="3" subdevid="1" chlid="3">finish</status >
+        <status ip="127.0.0.1" devtype="22" devid="3" subdevid="1" chlid="4">protect</status >
+        <status ip="127.0.0.1" devtype="22" devid="3" subdevid="1" chlid="5">pause</status >
+        <status ip="127.0.0.1" devtype="22" devid="3" subdevid="3" chlid="6">pause</status >
+        <status ip="127.0.0.1" devtype="22" devid="3" subdevid="1" chlid="7">finish </status >
+        <status ip="127.0.0.1" devtype="22" devid="3" subdevid="3" chlid="8">stop </status >
+        <status ip="127.0.0.1" devtype="22" devid="3" subdevid="3" chlid="8">finish </status >
+        <status ip="127.0.0.1" devtype="22" devid="3" subdevid="1" chlid="4">protect</status >
+        <status ip="127.0.0.1" devtype="22" devid="3" subdevid="1" chlid="4">protect</status >
+        <status ip="127.0.0.1" devtype="22" devid="3" subdevid="1" chlid="4">protect</status >
+    </list>
+</bts>
