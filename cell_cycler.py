@@ -131,5 +131,4 @@ class CellCycler():
         channel_data = []
         for channel in root[1]:    #root[1] is channel info in <list>
             channel_data.append(channel.attrib)
-        #return channel_data
-        return xml_string
+        return channel_data
