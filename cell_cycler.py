@@ -115,20 +115,24 @@ class CellCycler():
             channel_data.append(channel.attrib)
         return channel_data
     
-    def start_channels(self, chlcodes, profile_path):
+    def start_channels(self, chlcodes, profile_path, save_path):
         """accepts a list of channel codes in the form string "580206" and stops those channels
         also accepts path to test profile. automatically finds barcodes for each channel"""
         cells = self.chlcodes_to_tuples(chlcodes)
         barcodes = self.barcode_manager.barcodes_from_chlcodes(chlcodes)
         num_cells = len(cells)
         xml_command = f' <cmd>start</cmd>\n <list count = "{num_cells}">\n'
+        save_filename = f'testfilename'
+        xml_backup_command = f'  <backup backupdir="{save_path}" remotedir="" filenametype="0" customfilename="{save_filename}" addtimewhenrepeat="0" createdirbydate="0" filetype="1" backupontime="0" backupontimeinterval="720" backupfree="0" />\n'
         cell_addresses = ''
         for cell, barcode in zip(cells, barcodes):
             cell_addresses = cell_addresses + (f'  <start ip="{self.__ip_address}" devtype="24" devid="{cell[0]}" subdevid="{cell[1]}" chlid="{cell[2]}" barcode="{barcode}">{profile_path}</start>\n')
-        msg = self.XML_HEADER + xml_command + cell_addresses + self.XML_TAIL
+        msg = self.XML_HEADER + xml_command + cell_addresses + xml_backup_command + self.XML_TAIL
         xml_string = self.send_command(msg)
         root = ET.fromstring(xml_string.replace('#',''))
         channel_data = []
         for channel in root[1]:    #root[1] is channel info in <list>
-            channel_data.append(channel.attrib)
+            dict = channel.attrib
+            dict.update({"start result": channel.text})
+            channel_data.append(dict)
         return channel_data
