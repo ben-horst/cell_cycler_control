@@ -115,15 +115,14 @@ class CellCycler():
             channel_data.append(channel.attrib)
         return channel_data
     
-    def start_channels(self, chlcodes, profile_path, save_path):
+    def start_channels(self, chlcodes, profile_path, save_path, save_filename):
         """accepts a list of channel codes in the form string "580206" and stops those channels
         also accepts path to test profile. automatically finds barcodes for each channel"""
         cells = self.chlcodes_to_tuples(chlcodes)
         barcodes = self.barcode_manager.barcodes_from_chlcodes(chlcodes)
         num_cells = len(cells)
         xml_command = f' <cmd>start</cmd>\n <list count = "{num_cells}">\n'
-        save_filename = f'testfilename'
-        xml_backup_command = f'  <backup backupdir="{save_path}" remotedir="" filenametype="0" customfilename="{save_filename}" addtimewhenrepeat="0" createdirbydate="0" filetype="1" backupontime="0" backupontimeinterval="720" backupfree="0" />\n'
+        xml_backup_command = f'  <backup backupdir="{save_path}" remotedir="" filenametype="2" customfilename="{save_filename}" addtimewhenrepeat="0" createdirbydate="1" filetype="1" backupontime="0" backupontimeinterval="0" backupfree="0" />\n'
         cell_addresses = ''
         for cell, barcode in zip(cells, barcodes):
             cell_addresses = cell_addresses + (f'  <start ip="{self.__ip_address}" devtype="24" devid="{cell[0]}" subdevid="{cell[1]}" chlid="{cell[2]}" barcode="{barcode}">{profile_path}</start>\n')
@@ -136,3 +135,55 @@ class CellCycler():
             dict.update({"start result": channel.text})
             channel_data.append(dict)
         return channel_data
+    
+    def continue_channels(self, chlcodes):
+        """accepts a list of channel codes in the form string "580206" and continues (from a pause) those channels"""
+        cells = self.chlcodes_to_tuples(chlcodes)
+        num_cells = len(cells)
+        xml_command = f' <cmd>continue</cmd>\n <list count = "{num_cells}">\n'
+        cell_addresses = ''
+        for cell in cells:
+            cell_addresses = cell_addresses + (f'  <continue ip="{self.__ip_address}" devtype="24" devid="{cell[0]}" subdevid="{cell[1]}" chlid="{cell[2]}">true</continue>\n')
+        msg = self.XML_HEADER + xml_command + cell_addresses + self.XML_TAIL
+        xml_string = self.send_command(msg)
+        root = ET.fromstring(xml_string.replace('#',''))
+        channel_data = []
+        for channel in root[1]:    #root[1] is channel info under <list>
+            dict = channel.attrib
+            dict.update({"continue result": channel.text})
+            channel_data.append(dict)
+        return channel_data
+    
+    def get_working_states(self, chlcodes):
+        """accepts a list of channel codes in the form string "580206" and returns a list of their working states
+        returns things like working, pause, finish, stop, etc - this can be used to determine when a test is complete or paused"""
+        chan_data = self.get_channels_current_data(chlcodes)
+        states = []
+        for chan in chan_data:
+            states.append(chan.get('workstatus'))
+        return states
+
+    def all_channels_in_state(self, chlcodes, desired_state):
+        """accepts a list of channel codes in the form string "580206" and prints a list of their working states
+        returns true only once all of the channels match the desired state"""
+        states = self.get_working_states(chlcodes)
+        print(states)
+        state_matches = (state == desired_state for state in states)
+        return all(state_matches)
+    
+    def get_step_types(self, chlcodes):
+        """accepts a list of channel codes in the form string "580206" and returns a list of their step types
+        returns things like rest, cc, dc, cp, dp, etc"""
+        chan_data = self.get_channels_current_data(chlcodes)
+        steps = []
+        for chan in chan_data:
+            steps.append(chan.get('step_type'))
+        return steps
+    
+    def all_channels_in_steps(self, chlcodes, desired_step):
+        """accepts a list of channel codes in the form string "580206" and prints a list of their step types
+        returns true only once all of the channels match the desired step"""
+        steps = self.get_step_types(chlcodes)
+        print(steps)
+        step_matches = (step == desired_step for step in steps)
+        return all(step_matches)

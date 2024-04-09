@@ -13,8 +13,7 @@ class TemperatureController:
     def read_temperature(self):
         self._send_command("RT")
         response = self.serial_port.readline().decode().strip()
-        print("response is ")
-        print(response)
+        print(f"chiller temp: {response}")
         if response == '!':
             response == "command recieved"
             return response
@@ -23,17 +22,17 @@ class TemperatureController:
         elif response and (response[0] == '+' or response[0] == '-') and response[1:].isdigit():
             response = float(response)
         return response
-    def wait_for_temperature(self, target_temperature, timeout=None):
+    def wait_for_temperature(self, target_temperature, threshold, timeout=None):
         start_time = time.time()
 
         while True:
             current_temperature = float(self.read_temperature())
-            if current_temperature >= target_temperature:
+            if current_temperature > (target_temperature - threshold) and current_temperature < (target_temperature + threshold):
                 break
 
             if timeout is not None and (time.time() - start_time) > timeout:
                 raise TimeoutError("Timeout waiting for the target temperature")
-            time.sleep(1)  # Adjust the sleep interval as needed
+            time.sleep(5)  # Adjust the sleep interval as needed
         return current_temperature
     def _send_command(self, command):
         self.serial_port.write(command.encode() + b'\r')
