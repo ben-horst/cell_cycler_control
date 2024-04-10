@@ -18,9 +18,7 @@ chiller1.wait_for_temperature(temp, 0.5)
 print('temp achieved - starting test')
 print(cycler.start_channels(channels, profile, savepath, testname))
 #wait for all channels to complete
-while True:
-    if cycler.all_channels_in_state(channels, 'pause'):
-        break
+while not (cycler.all_channels_in_state(channels, 'pause')):
     print('waiting for channels to pause')
     time.sleep(5)
 #start by setting chamber to next temp

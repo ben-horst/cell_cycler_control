@@ -180,7 +180,7 @@ class CellCycler():
             steps.append(chan.get('step_type'))
         return steps
     
-    def all_channels_in_steps(self, chlcodes, desired_step):
+    def all_channels_in_step(self, chlcodes, desired_step):
         """accepts a list of channel codes in the form string "580206" and prints a list of their step types
         returns true only once all of the channels match the desired step"""
         steps = self.get_step_types(chlcodes)
