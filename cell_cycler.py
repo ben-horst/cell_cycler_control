@@ -17,7 +17,6 @@ class CellCycler():
         self.XML_HEADER = '<?xml version="1.0" encoding="UTF-8" ?>\n<bts version="1.0">\n'
         self.XML_TAIL = ' </list>\n</bts>\n\n#\r\n'
         self.barcode_manager = BarcodeManager()
-
         self.reconnect()
 
     def reconnect(self):
@@ -47,6 +46,13 @@ class CellCycler():
             chlid = int(chlcode[4:6])
             tuple_list.append((devid,subdevid,chlid))
         return tuple_list
+    
+    def build_chlcodes(self, bankid, cellids):
+        """takes a bank id in the form 5801 and a list of cell numbers [1,2] and returns a list of chlcodes [580101, 580102]"""
+        chlcodes = []
+        for cell in cellids:
+            chlcodes.append(str(bankid) + '0' + str(cell))
+        return chlcodes
 
     def get_device_info(self):
         """request all active channels from entire server"""
@@ -187,3 +193,4 @@ class CellCycler():
         print(steps)
         step_matches = (step == desired_step for step in steps)
         return all(step_matches)
+    

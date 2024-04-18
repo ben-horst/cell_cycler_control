@@ -1,0 +1,14 @@
+{
+    "readable_name": "test package",
+    "logfile_header": "test_package",
+    "description": "this is used for testing code",
+    "regulation": "water",
+    "channels": [1, 2],
+    "fanonstates": ["cp", "cc"],
+    "repeats": 0,
+    "temps": [],
+    "profile": "C:/Users/cell.test/Documents/Current Test Profiles/.......",
+    "profile_params": {
+        "Ah_throughput_30soc": ["Step8", "Cap"]
+    }
+}

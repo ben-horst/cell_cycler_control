@@ -10,8 +10,8 @@ testname = 'fan_test'
 channels = [270101]
 
 #start fans off
-fan.turn_off(0)
-print(f'fan state: {fan.get_relay_state(0)}')
+fan.turn_off(relay_num)
+print(f'fan state: {fan.get_relay_state(relay_num)}')
 
 #start a test that includes both charge and discharge steps
 print(cycler.start_channels(channels, profile, savepath, testname))

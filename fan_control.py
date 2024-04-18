@@ -1,7 +1,7 @@
 import serial
 
 class FanController:
-    def __init__(self, port, baudrate=19200, timeout=1):
+    def __init__(self, port="COM4", baudrate=19200, timeout=1):
         self.serial_port = serial.Serial(port, baudrate=baudrate, timeout=timeout)
     def turn_on(self, relayNum):
         cmd = f"relay on {relayNum}\n\r"

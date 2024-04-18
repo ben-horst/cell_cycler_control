@@ -1,0 +1,50 @@
+{
+    "2701": {
+        "regulation": "water",
+        "chiller": 1,
+        "fanrelay": null,
+        "chamber": 3
+    },
+    "2702": {
+        "regulation": "fan",
+        "chiller": null,
+        "fanrelay": 2,
+        "chamber": 3
+    },
+    "5201": {
+        "regulation": null,
+        "chiller": null,
+        "fanrelay": null,
+        "chamber": 1
+    },
+    "5202": {
+        "regulation": "fan",
+        "chiller": null,
+        "fanrelay": 0,
+        "chamber": 1
+    },
+    "5801": {
+        "regulation": "water",
+        "chiller": 1,
+        "fanrelay": null,
+        "chamber": 2
+    },
+    "5802": {
+        "regulation": "fan",
+        "chiller": null,
+        "fanrelay": 1,
+        "chamber": 2
+    },
+    "5901": {
+        "regulation": "water",
+        "chiller": 2,
+        "fanrelay": null,
+        "chamber": null
+    },
+    "5902": {
+        "regulation": "water",
+        "chiller": 2,
+        "fanrelay": null,
+        "chamber": null
+    }
+}
