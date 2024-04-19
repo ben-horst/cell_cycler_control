@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="GB2312"?>
+<root>
+  <config type="Step File" version="17" client_version="Build test 8.0.0.528(2024.02.23)(R3)" date="20240418182800" Guid="605dc426-4380-4b33-99b7-3b22a086e9b5">
+    <Head_Info>
+      <Operate Value="66" />
+      <Scale Value="1" />
+      <Start_Step Value="1" Hide_Ctrl_Step="0" />
+      <RateType Value="103" />
+    </Head_Info>
+    <Whole_Prt>
+      <Record>
+        <Main>
+          <Time Value="30000" />
+        </Main>
+      </Record>
+    </Whole_Prt>
+    <Step_Info Num="4">
+      <Step1 Step_ID="1" Step_Type="4">
+        <Record>
+          <Main>
+            <Time Value="10000" />
+          </Main>
+        </Record>
+        <Limit>
+          <Main>
+            <Time Value="30000" />
+          </Main>
+        </Limit>
+      </Step1>
+      <Step2 Step_ID="2" Step_Type="13">
+      </Step2>
+      <Step3 Step_ID="3" Step_Type="4">
+        <Record>
+          <Main>
+            <Time Value="10000" />
+          </Main>
+        </Record>
+        <Limit>
+          <Main>
+            <Time Value="30000" />
+          </Main>
+        </Limit>
+      </Step3>
+      <Step4 Step_ID="4" Step_Type="6">
+      </Step4>
+    </Step_Info>
+    <SMBUS>
+      <SMBUS_Info Num="0" AdjacentInterval="0" />
+    </SMBUS>
+  </config>
+</root>

@@ -1,0 +1,13 @@
+{
+    "readable_name": "water cooling test",
+    "logfile_header": "watercool_test",
+    "description": "30 sec rest, pause, 30 sec rest - repeat",
+    "regulation": "water",
+    "channels": [1, 2],
+    "fanonstates": ["cp", "cc"],
+    "repeats": 2,
+    "temps": [20, 25, 30],
+    "profile": "C:/Users/cell.test/Documents/GitHub/cell_cycler_control/test_profiles/rest_and_pause.xml",
+    "profile_params": {
+    }
+}

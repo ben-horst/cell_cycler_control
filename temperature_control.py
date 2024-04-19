@@ -13,14 +13,18 @@ class TemperatureController:
     def read_temperature(self):
         self._send_command("RT")
         response = self.serial_port.readline().decode().strip()
-        print(f"chiller temp: {response}")
+        #print(f"chiller temp: {response}")
         if response == '!':
-            response == "command recieved"
+            response == "command received"
             return response
-        if response == '?':
+        elif response == '?':
             response = "unknown command"
-        elif response and (response[0] == '+' or response[0] == '-') and response[1:].isdigit():
-            response = float(response)
+        else:
+            response.replace('+', '')
+            try:
+                response = float(response)
+            except:
+                print('bad chiller message')
         return response
     def wait_for_temperature(self, target_temperature, threshold, timeout=None):
         start_time = time.time()
