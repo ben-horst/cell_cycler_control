@@ -17,6 +17,7 @@ class TestManager():
         self.savepath = savepath
         self.bank_config_path = bank_config_path
         self.bank_config = {}
+        self.all_channels = []
         self.update_bank_config()
         self.bank_status = {}
         self.initialize_bank_status()
@@ -25,6 +26,10 @@ class TestManager():
         self.bank_control_interval = 10 #how often banks are controlled (fans on/off, chiller temps, repeats)
         self.bank_control_thread = threading.Thread(target=self.control_banks_recurring, daemon=True)
 
+    def start_status_and_control_checkers(self):
+        self.start_update_bank_statuses_recurring()
+        self.start_bank_control_recurring()
+    
     def start_update_bank_statuses_recurring(self):
         self.bank_update_thread.start()
     
@@ -50,6 +55,9 @@ class TestManager():
     def update_bank_statuses(self):
         """function to be called recurringly that checks all cells and updates bank status 'state' and 'active_cells' params
         also checks fan and chiller states and updates those params"""
+        #get all channel states & steps from cycler
+        all_channel_states = self.cycler.get_working_states(self.all_channels)
+        all_channel_steps = self.cycler.get_step_types(self.all_channels)
         #iterate through all banks
         for bankid, status in self.bank_status.items():
             if self.get_bank_regulation_type(bankid) == 'water':
@@ -60,10 +68,14 @@ class TestManager():
                 status.update({'fan_state': state})
             #build list of all channel codes in this banks
             chlcodes_in_bank = self.cycler.build_chlcodes(bankid, [1,2,3,4,5,6,7,8])
-            #poll for working states (working, pause, finish, stop)
-            status.update({'cell_states': self.cycler.get_working_states(chlcodes_in_bank)})
-            #poll for step (rest, cc, dc, cp, dp)
-            status.update({'cell_steps': self.cycler.get_step_types(chlcodes_in_bank)})
+            bank_channel_states = []
+            bank_channel_steps = []
+            for chlcode in chlcodes_in_bank:
+                bank_channel_states.append(all_channel_states.get(chlcode))    #working states (working, pause, finish, stop)
+                bank_channel_steps.append(all_channel_steps.get(chlcode))      #step (rest, cc, dc, cp, dp)
+            status.update({'cell_states': bank_channel_states}) 
+            status.update({'cell_steps': bank_channel_steps})
+
             #look at all cells, and check for overall bank state. if there are any that aren't 'stopped' or 'finish', then bank is 'busy.
             channels_busy = []
             for chl_state in status.get('cell_states'):
@@ -99,8 +111,13 @@ class TestManager():
         if any are in a step that requires fan on (based on test profile) turns on"""
 
         package = self.bank_status.get(bankid).get('test_package')
+        print(f'{bankid}: {package}')
+        print(f'package variable type is: {type(package)}')
         if package.get('regulation') == 'fan':
             all_channel_steps = self.bank_status.get(bankid.get('cell_steps'))
+            if len(all_channel_steps) == 0:
+                print('bank channel steps not available')
+                return
             channel_needs_fan = [] #true if channel is in step that needs fan
             for chl in package.get('channels'):
                 step = all_channel_steps[chl-1]    #channels are 1 indexed
@@ -118,12 +135,15 @@ class TestManager():
         """if all active channels are paused, sends continue command"""
         package = self.bank_status.get(bankid).get('test_package')
         all_channel_states = self.bank_status.get(bankid).get('cell_states')
+        if len(all_channel_states) == 0:
+            print('bank channel states not available')
+            return
         channels_paused = [] #list, true if channel is paused
         for chl in package.get('channels'):
             state = all_channel_states[chl-1]    #channels are 1 indexed
             channels_paused.append(state == 'pause')
         if all(channels_paused):
-            continue_result = self.continue_channels(bankid, package.get('channels'))
+            return self.continue_channels(bankid, package.get('channels'))
 
 
     def start_test_from_package(self, bankid, package_path, user_params={}):
@@ -160,6 +180,7 @@ class TestManager():
         self.bank_status.get(bankid).update({'test_package': test_package})
         self.bank_status.get(bankid).update({'test_starttime': datetime.now().strftime("%m/%d/%Y, %H:%M:%S")})
         self.bank_status.get(bankid).update({'repeats_remaining': test_package.get('repeats')})
+        self.bank_status.get(bankid).update({'repeat_temps': test_package.get('temps').copy()})
 
         start_result = self.send_test_start(bankid)
         return start_result, params_updated
@@ -186,7 +207,7 @@ class TestManager():
             self.set_bank_fan_off(bankid)
         start_temp = None
         if package.get('regulation') == 'water':
-            start_temp = package.get('temps').pop(0)   #grab the 0th entry and remove it
+            start_temp = self.bank_status.get(bankid).get('repeat_temps').pop(0)   #grab the 0th entry and remove it
             self.set_bank_chiller(bankid, start_temp)
         logfile_header = package.get('logfile_header')
         regulation = package.get('regulation')
@@ -225,6 +246,9 @@ class TestManager():
     def update_bank_config(self):
         with open(self.bank_config_path, 'r') as json_file:
             self.bank_config = json.load(json_file)
+        for bank_id in self.bank_config.keys():
+            chlcodes = self.cycler.build_chlcodes(bank_id, [1,2,3,4,5,6,7,8])
+            self.all_channels.extend(chlcodes)
 
     def get_bank_regulation_type(self, bankid):
         return self.bank_config.get(bankid).get('regulation')
@@ -239,19 +263,29 @@ class TestManager():
         return self.bank_status.get(bankid).get('state')
     
     def initialize_bank_status(self):
-        for key in self.bank_config:
+        for key in self.bank_config.keys():
             self.bank_status.update(
                 {key: {
                     'state': 'available',
-                    'test_package': None,
-                    'test_starttime': None,
+                    'test_package': '',
+                    'test_starttime': '',
                     'repeats_remaining': 0,
-                    'chiller_temp': None,
+                    'repeat_temps': [],
+                    'chiller_temp': -55,
                     'fan_state': 'off',
                     'cell_states': [],
                     'cell_steps': []
                     }
                 })
+            
+    def get_all_banks_statuses(self):
+        """gives a single dictionary with all of the bank statuses collapsed together, with key appended with the bank number"""
+        all_bank_statuses = {}
+        for bankid, status in self.bank_status.items():
+            for key, val in status.items():
+                new_key = str(bankid) + '-' + key
+                all_bank_statuses.update({new_key: val})
+        return all_bank_statuses
 
     def set_bank_chiller(self, bankid, temp):
         """"takes a bankid and temp setpoint, finds the matching chiller, then sends setpoint"""

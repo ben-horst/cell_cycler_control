@@ -5,8 +5,8 @@
     "regulation": "water",
     "channels": [1, 2],
     "fanonstates": ["cp", "cc"],
-    "repeats": 0,
-    "temps": [20],
+    "repeats": 2,
+    "temps": [20, 30, 40],
     "profile": "C:/Users/cell.test/Documents/GitHub/cell_cycler_control/test_profiles/practice.xml",
     "profile_params": {
         "cutoffAh": ["Step4", "Cap"]

@@ -1,3 +1,4 @@
+580103
 from barcode_manager import BarcodeManager
 
 bcm = BarcodeManager()

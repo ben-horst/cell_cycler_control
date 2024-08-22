@@ -47,6 +47,12 @@ class CellCycler():
             tuple_list.append((devid,subdevid,chlid))
         return tuple_list
     
+    def dev_to_chlcode(self, dev):
+        """takes a dev id in the form '24-58-1-1-0' and returns a channel code in form '580101' """
+        dev_nums = dev.split('-')
+        chlcode = dev_nums[1] + '0' + dev_nums[2] + '0' + dev_nums[3]
+        return chlcode
+    
     def build_chlcodes(self, bankid, cellids):
         """takes a bank id in the form 5801 and a list of cell numbers [1,2] and returns a list of chlcodes [580101, 580102]"""
         chlcodes = []
@@ -161,29 +167,31 @@ class CellCycler():
         return channel_data
     
     def get_working_states(self, chlcodes):
-        """accepts a list of channel codes in the form string "580206" and returns a list of their working states
+        """accepts a list of channel codes in the form string "580206" and returns a dictionary of their working states
         returns things like working, pause, finish, stop, etc - this can be used to determine when a test is complete or paused"""
         chan_data = self.get_channels_current_data(chlcodes)
-        states = []
+        states = {}
         for chan in chan_data:
-            states.append(chan.get('workstatus'))
+            chlcode = self.dev_to_chlcode(chan.get('dev'))
+            states.update({chlcode: chan.get('workstatus')})
         return states
 
     def all_channels_in_state(self, chlcodes, desired_state):
         """accepts a list of channel codes in the form string "580206" and prints a list of their working states
         returns true only once all of the channels match the desired state"""
-        states = self.get_working_states(chlcodes)
-        print(states)
+        states = self.get_working_states(chlcodes).values()
+        #print(states)
         state_matches = (state == desired_state for state in states)
         return all(state_matches)
     
     def get_step_types(self, chlcodes):
-        """accepts a list of channel codes in the form string "580206" and returns a list of their step types
+        """accepts a list of channel codes in the form string "580206" and returns a dictionary of their step types
         returns things like rest, cc, dc, cp, dp, etc"""
         chan_data = self.get_channels_current_data(chlcodes)
-        steps = []
+        steps = {}
         for chan in chan_data:
-            steps.append(chan.get('step_type'))
+            chlcode = self.dev_to_chlcode(chan.get('dev'))
+            steps.update({chlcode: chan.get('step_type')})
         return steps
     
     def all_channels_in_step(self, chlcodes, desired_step):
@@ -194,3 +202,31 @@ class CellCycler():
         step_matches = (step == desired_step for step in steps)
         return all(step_matches)
     
+    def update_test_profile_params(self, profile_path, params_to_edit, new_params):
+            """accepts a dictionary of parameters to edit, with each entry in the form
+            "human readable param name": ["step#", "keyword"] and dicctionary of new values for those parameters
+            with the same keys as params_to_edit along with path to xml file to edit"""
+            prsr = ET.XMLParser(encoding="utf-8")
+            tree = ET.parse(profile_path, parser=prsr)
+            root = tree.getroot()
+            for match in root.iter('Scale'):
+                scale = int(match.get('Value'))
+            params_updated = 0
+            for key, val in params_to_edit.items():
+                stepname = val[0]
+                keywordname = val[1]
+                for step in root.iter(stepname):       #go through all steps and look for matched string
+                    for keyword in step.iter(keywordname):      #go through all the lines and looks for the keyword
+                        val_from_user = new_params.get(key)
+                        if val_from_user is None:
+                            raise Exception("missing new parameter")
+                        else:
+                            if keyword.tag == 'Cap':    #since cap is stored in mAs, but user enters Ah
+                                newval = str(int(float(val_from_user) * 3600 * 1000 * scale))
+                            #can set other transforms for voltage, etc as needed
+                            else:
+                                newval = str(float(val_from_user) * scale)
+                            keyword.set('Value', newval)
+                            params_updated = params_updated + 1
+            tree.write(profile_path)
+            return params_updated
