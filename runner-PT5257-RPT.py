@@ -10,14 +10,16 @@ cycle_number = input("enter number of aging days accumulated: ")
 
 if cell_type == 'P30B':
     channels = [580101, 580102, 580103, 580104, 580105, 580106, 580107, 580108]
-    profile_RPT = "C:/Users/cell.test/Documents/Current Test Profiles/RPTs/P30_RPT_V1.1.xml"
+    #profile_RPT = "C:/Users/cell.test/Documents/Current Test Profiles/RPTs/P30_RPT_V1.1.xml"
+    profile_RPT = "C:/Users/cell.test/Documents/Unofficial Profiles/30s_rest.xml"
     charge_profile_base = "C:/Users/cell.test/Documents/Current Test Profiles/Single Charge-Discharge/P30B_charge_to"
     savepath = "C:/Users/cell.test/Documents/Test Data/PT-5257/P30B"
     testname_base = f'P30B_RPT_day{cycle_number}'
     chiller = TemperatureController("COM5")
 elif cell_type == 'P45B':
     channels = [270101, 270102, 270103, 270104, 270105, 270106, 270107, 270108]
-    profile_RPT = "C:/Users/cell.test/Documents/Current Test Profiles/RPTs/P45_RPT_V1.1.xml"
+    #profile_RPT = "C:/Users/cell.test/Documents/Current Test Profiles/RPTs/P45_RPT_V1.1.xml"
+    profile_RPT = "C:/Users/cell.test/Documents/Unofficial Profiles/30s_rest.xml"
     charge_profile_base = "C:/Users/cell.test/Documents/Current Test Profiles/Single Charge-Discharge/P45B_charge_to"
     savepath = "C:/Users/cell.test/Documents/Test Data/PT-5257/P45B"
     testname_base = f'P45B_RPT_day{cycle_number}'
@@ -67,8 +69,9 @@ for temp in temps:
 
     for soc, channel in zip(storage_socs, channels):
         testname = f'{testname_base}_{temp}degC_SOC{soc}'
-        start_data = cycler.start_channels(channel, profile_RPT, savepath, testname)
-        start_results.append(start_data.get('start result'))
+        start_data = cycler.start_channels([channel], profile_RPT, savepath, testname)
+        for item in start_data:
+            start_results.append(item.get('start result'))
   
     
     print(f'start result at {temp}deg C: {start_results}')
@@ -98,7 +101,8 @@ for soc, channel in zip(storage_socs, channels):
     charge_testname = f'{testname_base}_charge_to_{soc}soc'
     charge_profile = f"{charge_profile_base}_{soc}SOC.xml"
     charge_savepath = savepath + '/charges'
-    start_data = cycler.start_channels(channel, charge_profile, charge_savepath, charge_testname)
-    charge_start_results.append(start_data.get('start result'))
+    start_data = cycler.start_channels([channel], charge_profile, charge_savepath, charge_testname)
+    for item in start_data:
+        charge_start_results.append(item.get('start result'))
 
 print(f'charge start results: {charge_start_results}')
