@@ -10,16 +10,14 @@ cycle_number = input("enter number of aging days accumulated: ")
 
 if cell_type == 'P30B':
     channels = [580101, 580102, 580103, 580104, 580105, 580106, 580107, 580108]
-    #profile_RPT = "C:/Users/cell.test/Documents/Current Test Profiles/RPTs/P30_RPT_V1.1.xml"
-    profile_RPT = "C:/Users/cell.test/Documents/Unofficial Profiles/30s_rest.xml"
+    profile_RPT = "C:/Users/cell.test/Documents/Current Test Profiles/RPTs/P30_RPT_V1.1.xml"
     charge_profile_base = "C:/Users/cell.test/Documents/Current Test Profiles/Single Charge-Discharge/P30B_charge_to"
     savepath = "C:/Users/cell.test/Documents/Test Data/PT-5257/P30B"
     testname_base = f'P30B_RPT_day{cycle_number}'
     chiller = TemperatureController("COM5")
 elif cell_type == 'P45B':
     channels = [270101, 270102, 270103, 270104, 270105, 270106, 270107, 270108]
-    #profile_RPT = "C:/Users/cell.test/Documents/Current Test Profiles/RPTs/P45_RPT_V1.1.xml"
-    profile_RPT = "C:/Users/cell.test/Documents/Unofficial Profiles/30s_rest.xml"
+    profile_RPT = "C:/Users/cell.test/Documents/Current Test Profiles/RPTs/P45_RPT_V1.1.xml"
     charge_profile_base = "C:/Users/cell.test/Documents/Current Test Profiles/Single Charge-Discharge/P45B_charge_to"
     savepath = "C:/Users/cell.test/Documents/Test Data/PT-5257/P45B"
     testname_base = f'P45B_RPT_day{cycle_number}'
