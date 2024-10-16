@@ -9,7 +9,6 @@ cycler = CellCycler()
 chiller = TemperatureController("COM5")
 
 #chiller_num = 1
-#temps = [20, 35, 50]
 temps = [50]
 temp_padding = 0
 channels_p45 = [580101, 580102]
@@ -41,7 +40,7 @@ for temp in temps:
         max_cell_temp = max(cell_temps)
         print(f'chiller temp: {chiller_temp}  |  min cell temp: {min_cell_temp}  |  max cell temp: {max_cell_temp}')
         
-        if abs(temp - min_cell_temp) < 5 and abs(temp - max_cell_temp) < 50:
+        if abs(temp - min_cell_temp) < 5 and abs(temp - max_cell_temp) < 5:
             print(f'cell target temp reached: {min_cell_temp}degC')
             break
         elif abs(chiller_target - chiller_temp)  < 1:     #if the cell temp isn't reached, but the chiller temp has, then increase the chiller temp - needed due to heat loss to ambient

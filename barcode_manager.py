@@ -38,3 +38,4 @@ class BarcodeManager():
                 json.dump(database, json_file)
         else:
             raise Exception("invalid channel code")
+        
