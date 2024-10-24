@@ -2,11 +2,14 @@
 
 from cell_cycler import CellCycler
 import time
+import gmail
+
+email = gmail.gmail()
 
 cycler = CellCycler()
 rpt_profile = "C:/Users/cell.test/Documents/Current Test Profiles/Single Charge-Discharge/test_profile.xml"
 savepath = "C:/Users/cell.test/Downloads/"
-testname = 'test'
+testname = 'email test'
 
 channels = [590108]
 
@@ -36,3 +39,7 @@ while True:
         break
     else:
         time.sleep(30)
+
+print("---test complete---")
+print("sending completion email")
+email.send_email('ben.horst@flyzipline.com,erneste.niyigena@gmail.com', 'cell test complete', f'test {testname} on channels {channels} complete')

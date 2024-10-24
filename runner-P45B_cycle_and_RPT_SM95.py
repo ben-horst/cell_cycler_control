@@ -2,6 +2,9 @@
 
 from cell_cycler import CellCycler
 import time
+import gmail
+
+email = gmail.gmail()
 
 cycler = CellCycler()
 cycle_profile = "C:/Users/cell.test/Documents/Current Test Profiles/Cycle Tests/P45_cycle_test_V1.0.xml"
@@ -83,3 +86,7 @@ while True:
         time.sleep(30)
 
 print(f'cycle and RPT #{cycle_number} complete')
+print("sending completion email")
+email_addresses = 'ben.horst@flyzipline.com,erneste.niyigena@flyzipline.com,kyle.strohmaier@flyzipline.com'
+completion_message = f'SM-95 P45B accumulation of cycle number {cycle_number} and RPT completed.'
+email.send_email(email_addresses, 'Automated Cell Test Completion Notification', completion_message)
