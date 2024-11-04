@@ -25,7 +25,7 @@ elif cell_type == 'P45B':
     charge_profile_base = "C:/Users/cell.test/Documents/Current Test Profiles/Single Charge-Discharge/P45B_charge_to"
     savepath = "C:/Users/cell.test/Documents/Test Data/PT-5257/P45B"
     testname_base = f'P45B_day{cycle_number}_RPT'
-    chiller = TemperatureController("COM3")
+    chiller = TemperatureController("COM6")
 else:
     print('invalid cell type')
     sys.exit()
