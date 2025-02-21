@@ -83,7 +83,10 @@ for temp in temps:
         start_data = cycler.start_channels([channel], profile_RPT_P30, savepath_P30, testname)
         for item in start_data:
             start_results_P30.append(item.get('start result'))
+        time.sleep(0.25)
     print(f'P30 start result at {temp}deg C: {start_results_P30}')
+
+    time.sleep(5)
 
     print('starting P45 RPTs')
     start_results_P45 = []
@@ -92,6 +95,7 @@ for temp in temps:
         start_data = cycler.start_channels([channel], profile_RPT_P45, savepath_P45, testname)
         for item in start_data:
             start_results_P45.append(item.get('start result'))
+        time.sleep(0.25)
     print(f'P45 start result at {temp}deg C: {start_results_P45}')
     
     time.sleep(30)
@@ -123,7 +127,10 @@ for soc, channel in zip(storage_socs, channels_P30):
     start_data = cycler.start_channels([channel], charge_profile, charge_savepath, charge_testname)
     for item in start_data:
         charge_start_results_P30.append(item.get('start result'))
+    time.sleep(0.25)
 print(f'P30 charge start results: {charge_start_results_P30}')
+
+time.sleep(5)
 
 charge_start_results_P45 = []
 for soc, channel in zip(storage_socs, channels_P45):
@@ -133,6 +140,7 @@ for soc, channel in zip(storage_socs, channels_P45):
     start_data = cycler.start_channels([channel], charge_profile, charge_savepath, charge_testname)
     for item in start_data:
         charge_start_results_P45.append(item.get('start result'))
+    time.sleep(0.25)
 print(f'P45 charge start results: {charge_start_results_P45}')
 
 time.sleep(30)
