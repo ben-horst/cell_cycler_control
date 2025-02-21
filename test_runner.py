@@ -37,10 +37,10 @@ class TestRunner:
             bank_channels.update({bank: channels_in_bank})
         return bank_channels
     
-    def bring_all_cells_to_temp_and_block_until_complete(self, temp, timeout_mins=60):
+    def bring_all_cells_to_temp_and_block_until_complete(self, temp, timeout_mins=60, temp_tolerance=5):
         #commands all chillers to the target temperature, then waits for all cells to reach that temperature, bumping up/down chiller target if needed
         #this is blocking until the temperatures are achieved, but will abort if timeout (in minutes) is reached
-        print(f'setting chillers and starting blocing wait for all cells to reach temp - timeout = {timeout_mins} minutes')
+        print(f'setting chillers and starting blocking wait for all cells to reach within {temp_tolerance} deg of temp - timeout = {timeout_mins} minutes')
         start_time = time.time()
         temp_paddings = dict.fromkeys(self.banks, 0)
         chiller_targets = dict.fromkeys(self.banks, temp)
@@ -51,10 +51,10 @@ class TestRunner:
         #wait for chillers to reach temp
         while True:
             if time.time() - start_time > timeout_mins * 60:
-                self.send_email(f'{self.test_title} Test Aborted - Temperature Timeout', f'Cells failed to reach target temperature within {timeout_mins} minutes - aborting test.')
+                self.send_email(f'{self.test_title} Test Aborted - Temperature Timeout', f'Cells failed to reach target temperature within {timeout_mins} minutes - aborting test. Bank temp_okay status: {temps_ok}')
                 raise RuntimeError(f'failed to reach target temperature within {timeout_mins} minutes - aborting test')
             if all(temps_ok.values()):
-                print('all cells reached within 5 deg of target temperature')
+                print(f'all cells reached within {temp_tolerance} deg of target temperature')
                 break
             for bank in self.banks:
                 if not temps_ok[bank]:
@@ -67,7 +67,7 @@ class TestRunner:
                     max_cell_temp = max(cell_temps)
                     print(f'bank {bank} -- chiller temp: {chiller_temp}  |  min cell temp: {min_cell_temp}  |  max cell temp: {max_cell_temp}')
                 
-                    if abs(temp - min_cell_temp) < 5 and abs(temp - max_cell_temp) < 5:
+                    if abs(temp - min_cell_temp) < temp_tolerance and abs(temp - max_cell_temp) < temp_tolerance:
                         print(f'bank {bank} cell target temp reached: {min_cell_temp}degC')
                         temps_ok[bank] = True
                     elif abs(chiller_targets[bank] - chiller_temp)  < 1:     #if the cell temp isn't reached, but the chiller temp has, then increase the chiller temp - needed due to heat loss to ambient
@@ -103,7 +103,7 @@ class TestRunner:
     def wait_for_all_channels_to_finish_and_block_until_complete(self, timeout_mins=60*24*14):
         #pings the cycler every 30 seconds to check if all channels have finished. Blocks until all channels are finished.
         #timeout is in minutes, defaulting to 2 weeks
-        print(f'starting blocing wait for all channels to finish - timeout = {timeout_mins} ({timeout_mins/(60*24)} days)')
+        print(f'starting blocking wait for all channels to finish - timeout = {timeout_mins} minutes ({timeout_mins/(60*24)} days)')
         start_time = time.time()
         while True:
             if time.time() - start_time > timeout_mins * 60:
@@ -121,7 +121,6 @@ class TestRunner:
                 break
             else:
                 time.sleep(30)
-        print("all channels finished")
 
     def send_email(self, subject, body):
         self.email.send_email(self.email_addresses, subject, body)
