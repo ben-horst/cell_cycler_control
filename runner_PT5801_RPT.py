@@ -35,4 +35,4 @@ for temp in temps:
     test_runner.start_tests(channels, profile, savepath, filenames)
     test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=60*48)
 
-test_runner.send_email(f'{test_title} Test Complete', f'All tests completed successfully.\n\nBanks used: {banks}\n\nSpecimens tested: {specimens}')
+test_runner.send_email(f'{test_title} Test Complete', f'All tests completed successfully.\n\nBanks used: {active_banks}\n\nSpecimens tested: {specimens}')
