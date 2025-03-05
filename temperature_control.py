@@ -5,6 +5,8 @@ import time
 class TemperatureController:
     def __init__(self, port, baudrate=115200, timeout=1):
         self.serial_port = serial.Serial(port, baudrate=baudrate, bytesize=8, parity='N', stopbits=1, timeout=timeout)
+    def __str__(self):
+        return f'Chiller controller object on comport {self.serial_port}'
     def set_temperature(self, temperature):
         command = f"SS{temperature}"
         self._send_command(command)

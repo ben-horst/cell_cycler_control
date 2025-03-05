@@ -1,9 +1,11 @@
 import PT5801_config as CONFIG
 from test_runner import TestRunner
 
-profile = "C:/Users/cell.test/Documents/Current Test Profiles/RPTs/P45_RPT_V1.2.xml"
+#profile = "C:/Users/cell.test/Documents/Current Test Profiles/RPTs/P45_RPT_V1.2.xml"
+profile = "C:/Users/cell.test/Documents/Current Test Profiles/Specific Tests/rest_with_10Hz_log.xml"
 savepath = "C:/Users/cell.test/Documents/Test Data/PT-5801/RPTs"
-temps = [20, 35, 50]
+#temps = [20, 35, 50]
+temps = [25, 30]
 test_title = 'PT5801_RPTs'
 
 
