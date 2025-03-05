@@ -6,7 +6,6 @@ import time
 import gmail
 
 email = gmail.gmail()
-chiller_controller = ChillerController()
 
 input("This script will run a multi-temp RPT for P30B and P45B cells, then charge to storage SOCs. Please ensure that cells are properly located in banks 2701 and 5801. Press enter to continue")
 cycle_number = input("enter number of aging days accumulated: ")
@@ -27,6 +26,7 @@ savepath_P45 = "C:/Users/cell.test/Documents/Test Data/PT-5257/P45B"
 testname_base_P45 = f'P45B_day{cycle_number}_RPT'
 
 banks = [2701, 5801]
+chiller_controller = ChillerController(banks)
 all_channels = channels_P30 + channels_P45
 bank_channels = {}
 for bank in banks:

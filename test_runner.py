@@ -12,7 +12,7 @@ class TestRunner:
         self.test_title = test_title
         self.banks = self.find_banks_used()
         self.bank_channels = self.update_bank_channels()
-        self.chiller_controller = ChillerController()
+        self.chiller_controller = ChillerController(self.banks)
         self.barcode_manager = BarcodeManager()
         self.cycler = CellCycler()
         self.email = gmail.gmail()
@@ -40,7 +40,7 @@ class TestRunner:
     def bring_all_cells_to_temp_and_block_until_complete(self, temp, timeout_mins=60, temp_tolerance=5):
         #commands all chillers to the target temperature, then waits for all cells to reach that temperature, bumping up/down chiller target if needed
         #this is blocking until the temperatures are achieved, but will abort if timeout (in minutes) is reached
-        print(f'setting chillers and starting blocking wait for all cells to reach within {temp_tolerance} deg of temp - timeout = {timeout_mins} minutes')
+        print(f'setting chillers and starting blocking wait for all cells to reach within {temp_tolerance} deg of {temp} degC - timeout = {timeout_mins} minutes')
         start_time = time.time()
         temp_paddings = dict.fromkeys(self.banks, 0)
         chiller_targets = dict.fromkeys(self.banks, temp)
@@ -57,7 +57,7 @@ class TestRunner:
                 print(f'all cells reached within {temp_tolerance} deg of target temperature')
                 break
             for bank in self.banks:
-                if not temps_ok[bank]:
+                if not temps_ok[bank]:  #if the cells haven't yet reached the required temp
                     chiller_temp = self.chiller_controller.read_temp(bank)
                     chan_data = self.cycler.get_channels_current_data(self.bank_channels[bank])
                     cell_temps = []
@@ -77,12 +77,15 @@ class TestRunner:
                         elif avg_cell_temp > temp:
                             temp_paddings[bank] = temp_paddings[bank] - 1
                         chiller_targets[bank] = temp + temp_paddings[bank]
-                        print(f'setting chiller to {chiller_targets[bank]}degC')
-                        self.chiller_controller.set_temp(bank, chiller_targets[bank])
+                        print(f'changing bank {bank} chiller setpoint to {chiller_targets[bank]}')
+                    #keep resending the chiller target, in case the first transmission was lost
+                    print(f'setting chiller to {chiller_targets[bank]}degC')
+                    self.chiller_controller.set_temp(bank, chiller_targets[bank])
             time.sleep(30)
 
     def start_tests(self, channels, profile, savepath, filenames):
         #starts tests on the given channels. May either provide a single filename for all tests, or a list of filenames for each channel
+        print(f'starting tests on channels {channels}')
         start_results = []
         if type(filenames) == str:  #if a single filename is provided
             filename = filenames
@@ -97,7 +100,10 @@ class TestRunner:
                     start_data = self.cycler.start_channels([channel], profile, savepath, filename)
                     for item in start_data:
                         start_results.append(item.get('start result'))
-
+                    time.sleep(0.5) #small delay between transmissions
+        print('all start requests sent - waiting for responses')
+        time.sleep(10)
+        print(f'start results: {start_results})')
         return start_results
 
     def wait_for_all_channels_to_finish_and_block_until_complete(self, timeout_mins=60*24*14):
