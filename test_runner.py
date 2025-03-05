@@ -12,7 +12,7 @@ class TestRunner:
         self.test_title = test_title
         self.banks = self.find_banks_used()
         self.bank_channels = self.update_bank_channels()
-        self.chiller_controller = ChillerController()
+        self.chiller_controller = ChillerController(self.banks)
         self.barcode_manager = BarcodeManager()
         self.cycler = CellCycler()
         self.email = gmail.gmail()
