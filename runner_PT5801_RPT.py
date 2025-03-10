@@ -33,7 +33,8 @@ barcodes = test_runner.barcodes
 
 for temp in temps:
     test_runner.bring_all_cells_to_temp_and_block_until_complete(temp=temp, timeout_mins=60)
-    test_runner.start_tests(channels, profile, savepath, filenames)
+    filenames_with_temps = [f'{filename}_at_{temp}degC' for filename in filenames]
+    test_runner.start_tests(channels, profile, savepath, filenames_with_temps)
     test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=60*48)
 
 test_runner.send_email(f'{test_title} Test Complete',
