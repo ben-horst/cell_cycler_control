@@ -1,4 +1,4 @@
-from test_runner import TestRunner
+from core.test_runner import TestRunner
 
 all_channels = [590107, 590108]
 profile = "C:/Users/cell.test/Documents/Current Test Profiles/Specific Tests/rest_with_10Hz_log.xml"

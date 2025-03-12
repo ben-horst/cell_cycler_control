@@ -1,5 +1,5 @@
-import PT5801_config as CONFIG
-from test_runner import TestRunner
+import configs.PT5801 as CONFIG
+from core.test_runner import TestRunner
 
 profile = "C:/Users/cell.test/Documents/Current Test Profiles/RPTs/P45_RPT_V1.2.xml"
 savepath = "C:/Users/cell.test/Documents/Test Data/PT-5801/RPTs"

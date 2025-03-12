@@ -1,5 +1,5 @@
 
-from barcode_manager import BarcodeManager
+from core.barcode_manager import BarcodeManager
 
 bcm = BarcodeManager()
 
