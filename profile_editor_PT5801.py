@@ -52,15 +52,19 @@ class mat_extractor:
         val = row['capacity'].values[0]
         return val
 
-mat_file = "C:/Users/local.user/Downloads/profile_update_file (2).mat"
+mat_file = "C:/Users/local.user/Downloads/new_populated_profile_update_file.mat"
 mat_extractor = mat_extractor(mat_file)
 
-all_specimens = [spec for specs_per_bank in CONFIG.SPECIMENS_PER_BANK.values() for spec in specs_per_bank]
 
-for spec_id in all_specimens:
-    cutoff_current_20 = mat_extractor.get_cutoff_current(spec_id, 20)
-    cutoff_current_30 = mat_extractor.get_cutoff_current(spec_id, 30)
-    cutoff_current_40 = mat_extractor.get_cutoff_current(spec_id, 40)
-    cutoff_current_55 = mat_extractor.get_cutoff_current(spec_id, 55)
-    capacity = mat_extractor.get_capacity(spec_id)
-    print(f'Specimen ID: {spec_id}, 20C: {cutoff_current_20}, 30C: {cutoff_current_30}, 40C: {cutoff_current_40}, 55C: {cutoff_current_55}, Capacity: {capacity}')
+# Create a dictionary of new parameters for each specimen, pulling from .mat file
+new_params = {}
+for bank in CONFIG.AVAILABLE_BANKS:
+    for spec_id in CONFIG.SPECIMENS_PER_BANK[bank]:
+        charge_temp = CONFIG.BANK_CHARGE_TEMPS[bank]
+        cutoff_current = mat_extractor.get_cutoff_current(spec_id, charge_temp)
+        cell_capacity = mat_extractor.get_capacity(spec_id)
+        new_params[spec_id] = {'cutoff_current': cutoff_current, 'cell_capacity': cell_capacity}
+
+cond = 'T8C1'
+print(f'base charge profile: {CONFIG.BASE_CHARGE_PROFILES[cond]['FC']}')
+print(f'ext. discharge: {CONFIG.DISCHARGE_DEPTHS[cond]['EX']} / std. discharge: {CONFIG.DISCHARGE_DEPTHS[cond]['ST']}')
