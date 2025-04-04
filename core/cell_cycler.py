@@ -2,7 +2,7 @@ import socket
 import time
 import logging
 import xml.etree.ElementTree as ET
-from barcode_manager import BarcodeManager
+from core.barcode_manager import BarcodeManager
 
 class CellCycler():
     """this is a class to control and communicate with Neware cell cyclers over their TCP API"""

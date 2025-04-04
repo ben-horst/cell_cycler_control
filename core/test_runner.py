@@ -1,21 +1,22 @@
 # class to build test runners on top of
 
-from cell_cycler import CellCycler
-from chiller_controller import ChillerController
-from barcode_manager import BarcodeManager
+from core.cell_cycler import CellCycler
+from core.chiller_controller import ChillerController
+from core.barcode_manager import BarcodeManager
+from core.gmail import Gmail
 import time
-import gmail
 
 class TestRunner:
     def __init__(self, all_channels, test_title, email_addresses='ben.horst@flyzipline.com,erneste.niyigena@flyzipline.com'):
         self.all_channels = all_channels
         self.test_title = test_title
         self.banks = self.find_banks_used()
+        print(self.banks)
         self.bank_channels = self.update_bank_channels()
         self.chiller_controller = ChillerController(self.banks)
         self.barcode_manager = BarcodeManager()
         self.cycler = CellCycler()
-        self.email = gmail.gmail()
+        self.email = Gmail()
         self.email_addresses = email_addresses
         self.barcodes = self.barcode_manager.barcodes_from_chlcodes(self.all_channels)
         input(f"This test runner will run {test_title} on {len(self.all_channels)} cells in banks {self.banks}.\nThe barcodes are {self.barcodes}.\nPress any enter to continue: ")

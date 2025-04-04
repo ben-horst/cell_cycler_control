@@ -9,7 +9,7 @@ from googleapiclient.errors import HttpError
 from email.message import EmailMessage
 
 
-class gmail:
+class Gmail:
     def __init__(self):
         self.scopes = ["https://www.googleapis.com/auth/gmail.send"]
         self.creds = None
