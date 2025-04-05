@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 
-class profile_editor:
+class ProfileEditor:
     #class to allow direct editing of parameters in Neware XML profiles
     def __init__(self, filepath):
         self.prsr = ET.XMLParser(encoding="utf-8")

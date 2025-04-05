@@ -1,8 +1,8 @@
-from core.xml_editor import profile_editor
+from core.xml_editor import ProfileEditor
 
 filepath = "G:/.shortcut-targets-by-id/1-L4j121bGjSf--B6mGTPalBgTyvO_rtD/P2 Zip Battery World/Testing/Cell Test Data/Test Profiles/Cycle Tests/P45_cycle_test_V1.0.xml"
 
-editor = profile_editor(filepath)
+editor = ProfileEditor(filepath)
 
 params_to_get = {
     'charge_voltage': ['Step2', 'Volt'],
