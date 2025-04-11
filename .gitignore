@@ -1,4 +1,2 @@
-token.json
-credentials.json
-barcode_database.json
+*.json
 __pycache__/
