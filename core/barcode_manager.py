@@ -1,7 +1,7 @@
 import json
 
 class BarcodeManager():
-    def __init__(self,filepath='barcode_database.json'):
+    def __init__(self,filepath='./configs/barcode_database.json'):
         self.filepath = filepath
         self.minimum_barcode_length = 7
 

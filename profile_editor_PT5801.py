@@ -73,7 +73,7 @@ output_file_path = "G:/.shortcut-targets-by-id/1-L4j121bGjSf--B6mGTPalBgTyvO_rtD
 mat_extractor = MatExtractor(mat_file)
 
 
-def build_new_charge_profiles(params_dict, base_file_path, output_file_path):
+def build_new_profiles(params_dict, base_file_path, output_file_path):
     # Create a new folder with today's date within output_file_path
     today_date = datetime.now().strftime("%Y-%m-%d")
     dated_output_path = os.path.join(output_file_path, today_date)
@@ -82,24 +82,39 @@ def build_new_charge_profiles(params_dict, base_file_path, output_file_path):
     for spec_id, params in params_dict.items():
         condition = spec_id[0:-2]  # get the condition from the specimen ID, chopping off the last two characters which represent replicate ID
 
+        #fast charge
         base_fc_profile = CONFIG.BASE_CHARGE_PROFILES[condition]['FC']
         fc_profile_path = f"{base_file_path}/{base_fc_profile}.xml"
         new_fc_profile_path = f"{dated_output_path}/{spec_id}_FC.xml"
+        fc_params = {"charge_cutoff_current": [f"Step{CONFIG.CHARGE_TAPER_STEP}", "Stop_Curr"]}    #get the step number from the config file for where to edit the cutoff current
+        fc_param_vals = {"charge_cutoff_current": params['cutoff_current']}    #get the cutoff current value from the extracted data from the .mat
         shutil.copy(fc_profile_path, new_fc_profile_path)   #copy the base file to the new directory
-        ##open the new file and edit the parameters
-        fc_editor = ProfileEditor(new_fc_profile_path)
-        params_to_edit = {"charge_cutoff_current": [f"Step{CONFIG.CHARGE_TAPER_STEP}", "Stop_Curr"]}    #get the step number from the config file for where to edit the cutoff current
-        updated_params = {"charge_cutoff_current": params['cutoff_current']}    #get the cutoff current value from the extracted data from the .mat
-        fc_editor.update_test_profile_params(params_to_edit, updated_params)    #update the xml profile
+        fc_editor = ProfileEditor(new_fc_profile_path) #open the new file and edit the parameters
+        fc_editor.update_test_profile_params(fc_params, fc_param_vals)    #update the xml profile
 
+        #slow charge
         base_sc_profile = CONFIG.BASE_CHARGE_PROFILES[condition]['SC']
         sc_profile_path = f"{base_file_path}/{base_sc_profile}.xml"
         new_sc_profile_path = f"{dated_output_path}/{spec_id}_SC.xml"
         shutil.copy(sc_profile_path, new_sc_profile_path)  #copy the base file to the new directory
 
+        #discharges
+        for type in ['EX', 'ST']:
+            base_dc_profile = CONFIG.DISCHARGE_PROFILES[type]
+            dc_profile_path = f"{base_file_path}/{base_dc_profile}"
+            new_dc_profile_path = f"{dated_output_path}/{spec_id}_{type}.xml"
+            total_wh = params['cell_capacity'] * CONFIG.P45B_NOM_V
+            wh_to_discharge = CONFIG.DISCHARGE_DEPTHS[condition][type] * total_wh   #depth of discharge * measured total capacity of cell
+            wh_in_varied_step = wh_to_discharge - CONFIG.DISCHARGE_FIXED_WH[type]
+            s_in_varied_step = 3600 * wh_in_varied_step / CONFIG.DISCHARGE_POWER_VARIED_STEP[type]
+            dc_params = {"discharge_time": [f"Step{CONFIG.DISCHARGE_VARIED_STEP}", "Time"]}    #get the step number from the config file for where to edit the varied discharge time
+            dc_param_vals = {"discharge_time": s_in_varied_step}
+            shutil.copy(dc_profile_path, new_dc_profile_path)   #copy the base file to the new directory
+            dc_editor = ProfileEditor(new_dc_profile_path)  #open the new file and edit the parameters
+            dc_editor.update_test_profile_params(dc_params, dc_param_vals)  
+        break
+
+
 
 new_params = mat_extractor.build_params_dict()
-build_new_charge_profiles(new_params, base_file_path, output_file_path)
-#TODO: add the discharge profile building function here
-
-
+build_new_profiles(new_params, base_file_path, output_file_path)
