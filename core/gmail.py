@@ -15,15 +15,16 @@ class Gmail:
         self.creds = None
 
     def get_creds(self):
-        if os.path.exists("token.json"):
-            self.creds = Credentials.from_authorized_user_file("token.json", self.scopes)
+        if os.path.exists("./core/token.json"):
+            self.creds = Credentials.from_authorized_user_file("./core/token.json", self.scopes)
         if not self.creds or not self.creds.valid:
+            print(self.creds.valid)
             if self.creds and self.creds.expired and self.creds.refresh_token:
                 self.creds.refresh(Request())
             else:
-                flow = InstalledAppFlow.from_client_secrets_file("credentials.json", self.scopes)
+                flow = InstalledAppFlow.from_client_secrets_file("./core/credentials.json", self.scopes)
                 self.creds = flow.run_local_server(port=0)
-            with open("token.json", "w") as token:
+            with open("./core/token.json", "w") as token:
                 token.write(self.creds.to_json())
 
     def send_email(self, to, subject, content):

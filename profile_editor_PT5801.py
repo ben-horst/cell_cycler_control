@@ -66,9 +66,9 @@ class MatExtractor:
                 new_params[spec_id] = {'cutoff_current': cutoff_current, 'cell_capacity': cell_capacity}
         return new_params
 
-mat_file = "C:/Users/local.user/Downloads/updated_sample_profile_update_file.mat"
-base_file_path = "G:/.shortcut-targets-by-id/1-L4j121bGjSf--B6mGTPalBgTyvO_rtD/P2 Zip Battery World/Testing/Cell Test Data/PT-5801 - Empirical Cycle Testing/base_profiles"
-output_file_path = "G:/.shortcut-targets-by-id/1-L4j121bGjSf--B6mGTPalBgTyvO_rtD/P2 Zip Battery World/Testing/Cell Test Data/PT-5801 - Empirical Cycle Testing/edited_profiles"
+mat_file = "G:/My Drive/Cell Test Data/PT5801/Parameters/sample_parameters.mat"
+base_file_path = "G:/My Drive/Cell Test Profiles/Cycles/PT5801_base_profiles"
+output_file_path = "G:/My Drive/Cell Test Profiles/Cycles/PT5801_tuned_profiles"
 
 mat_extractor = MatExtractor(mat_file)
 

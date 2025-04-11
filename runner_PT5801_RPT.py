@@ -2,13 +2,13 @@ import configs.PT5801 as CONFIG
 from core.test_runner import TestRunner
 from core.cycle_manager_PT5801 import CycleManager
 
-profile = "C:/Users/cell.test/Documents/Current Test Profiles/RPTs/P45_RPT_V1.2.xml"
-savepath = "C:/Users/cell.test/Documents/Test Data/PT-5801/RPTs"
+profile = "G:/My Drive/Cell Test Profiles/RPTs/P45_RPT_V1.2.xml"
+savepath = "G:/My Drive/Cell Test Data/PT5801/RPTs"
 temps = [20, 35, 50]
 test_title = 'PT5801_RPTs'
 
-cqt_profile = "C:/Users/cell.test/Documents/Current Test Profiles/Utilities/CQT_1C_4C.xml"
-cqt_savepath = "C:/Users/cell.test/Documents/Test Data/PT-5801/CQTs"
+cqt_profile = "G:/My Drive/Cell Test Profiles/Utilities/CQT_P45B_1C_4C.xml"
+cqt_savepath = "G:/My Drive/Cell Test Data/PT5801/CQTs"
 cqt_temp = 20
 
 bank_request = input("Enter the banks for RPT execution, separated by commas, or enter 'ALL' to use all 6 banks: ")
@@ -53,10 +53,10 @@ barcodes = test_runner.barcodes
 print('Setting temperature for cell connection quality test...')
 test_runner.bring_all_cells_to_temp_and_block_until_complete(temp=cqt_temp, timeout_mins=30)
 test_runner.start_tests(channels, cqt_profile, cqt_savepath, filenames)
-test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=5)  
+test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=4)  
 for specimen in specimens:
     cycle_manager.update_cycle_tracker(specimen, 'CQT', increment=False)  #update cycle tracker
-#the above only passes if all cells reach the "finish" state within the timeoue, otherwise the program rasies exception and exits
+#the above only passes if all cells reach the "finish" state within the timeout, otherwise the program rasies exception and exits
 
 #start all the RPTs
 for temp in temps:
