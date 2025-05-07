@@ -4,8 +4,7 @@ from core.cycle_manager_PT5801 import CycleManager
 
 profile = "G:/My Drive/Cell Test Profiles/RPTs/P45_RPT_V1.2.xml"
 savepath = "G:/My Drive/Cell Test Data/PT5801/RPTs"
-#temps = [20, 35, 50]
-temps = [50]
+temps = [20, 35, 50]
 test_title = 'PT5801_RPTs'
 
 cqt_profile = "G:/My Drive/Cell Test Profiles/Utilities/CQT_P45B_1C_4C.xml"

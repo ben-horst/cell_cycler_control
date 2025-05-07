@@ -5,6 +5,8 @@ import shutil
 import os
 from datetime import datetime
 from core.xml_editor import ProfileEditor
+import tkinter as tk
+from tkinter import filedialog
 import configs.PT5801 as CONFIG
 
 class MatExtractor:
@@ -66,18 +68,14 @@ class MatExtractor:
                 new_params[spec_id] = {'cutoff_current': cutoff_current, 'cell_capacity': cell_capacity}
         return new_params
 
-mat_file = "G:/My Drive/Cell Test Data/PT5801/Parameters/sample_parameters.mat"
-base_file_path = "G:/My Drive/Cell Test Profiles/Cycles/PT5801_base_profiles"
-output_file_path = "G:/My Drive/Cell Test Profiles/Cycles/PT5801_tuned_profiles"
-
-mat_extractor = MatExtractor(mat_file)
-
-
 def build_new_profiles(params_dict, base_file_path, output_file_path):
     # Create a new folder with today's date within output_file_path
     today_date = datetime.now().strftime("%Y-%m-%d")
     dated_output_path = os.path.join(output_file_path, today_date)
     os.makedirs(dated_output_path, exist_ok=True)
+
+    print(f"Creating new profiles in {dated_output_path}")
+    print("Spec ID\tCutoff Curr\tCell Capacity\tEX dchg time\tST dchg time")
 
     for spec_id, params in params_dict.items():
         condition = spec_id[0:-2]  # get the condition from the specimen ID, chopping off the last two characters which represent replicate ID
@@ -99,6 +97,7 @@ def build_new_profiles(params_dict, base_file_path, output_file_path):
         shutil.copy(sc_profile_path, new_sc_profile_path)  #copy the base file to the new directory
 
         #discharges
+        dchg_times = {'EX': 0, 'ST': 0}
         for type in ['EX', 'ST']:
             base_dc_profile = CONFIG.DISCHARGE_PROFILES[type]
             dc_profile_path = f"{base_file_path}/{base_dc_profile}"
@@ -109,12 +108,26 @@ def build_new_profiles(params_dict, base_file_path, output_file_path):
             s_in_varied_step = 3600 * wh_in_varied_step / CONFIG.DISCHARGE_POWER_VARIED_STEP[type]
             dc_params = {"discharge_time": [f"Step{CONFIG.DISCHARGE_VARIED_STEP}", "Time"]}    #get the step number from the config file for where to edit the varied discharge time
             dc_param_vals = {"discharge_time": s_in_varied_step}
+            dchg_times[type] = s_in_varied_step
             shutil.copy(dc_profile_path, new_dc_profile_path)   #copy the base file to the new directory
             dc_editor = ProfileEditor(new_dc_profile_path)  #open the new file and edit the parameters
             dc_editor.update_test_profile_params(dc_params, dc_param_vals)  
-        break
+        
+        print(f"{spec_id}\t{params['cutoff_current']}\t{params['cell_capacity']}\t{dchg_times['EX']}\t{dchg_times['ST']}")
 
+root = tk.Tk()
+root.withdraw()  # Hide the root window
+mat_file = filedialog.askopenfilename(
+    title="Select a .mat file",
+    filetypes=[("MAT files", "*.mat")]
+)
+if not mat_file:
+    raise ValueError("No .mat file selected")
 
+base_file_path = "G:/My Drive/Cell Test Profiles/Cycles/PT5801_base_profiles"
+output_file_path = "G:/My Drive/Cell Test Profiles/Cycles/PT5801_tuned_profiles"
+
+mat_extractor = MatExtractor(mat_file)
 
 new_params = mat_extractor.build_params_dict()
 build_new_profiles(new_params, base_file_path, output_file_path)
