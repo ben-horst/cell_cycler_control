@@ -33,6 +33,8 @@
 # params = editor.get_current_params(params_to_get)
 # print(params)
 
-from core.gmail import Gmail
-email = Gmail()
-email.send_email('ben.horst@flyzipline.com', 'test', 'hello 2!')
+from core.temperature_control import TemperatureController
+
+tc = TemperatureController('COM5')
+tc.set_temperature(20)
+

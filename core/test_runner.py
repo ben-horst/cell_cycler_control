@@ -11,7 +11,6 @@ class TestRunner:
         self.all_channels = all_channels
         self.test_title = test_title
         self.banks = self.find_banks_used()
-        print(self.banks)
         self.bank_channels = self.update_bank_channels()
         self.chiller_controller = ChillerController(self.banks)
         self.barcode_manager = BarcodeManager()

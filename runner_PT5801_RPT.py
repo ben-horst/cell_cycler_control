@@ -4,7 +4,8 @@ from core.cycle_manager_PT5801 import CycleManager
 
 profile = "G:/My Drive/Cell Test Profiles/RPTs/P45_RPT_V1.2.xml"
 savepath = "G:/My Drive/Cell Test Data/PT5801/RPTs"
-temps = [20, 35, 50]
+#temps = [20, 35, 50]
+temps = [50]
 test_title = 'PT5801_RPTs'
 
 cqt_profile = "G:/My Drive/Cell Test Profiles/Utilities/CQT_P45B_1C_4C.xml"
@@ -50,12 +51,12 @@ test_runner = TestRunner(channels, test_title)
 barcodes = test_runner.barcodes
 
 #perform connection quality check
-print('Setting temperature for cell connection quality test...')
-test_runner.bring_all_cells_to_temp_and_block_until_complete(temp=cqt_temp, timeout_mins=30)
-test_runner.start_tests(channels, cqt_profile, cqt_savepath, filenames)
-test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=4)  
-for specimen in specimens:
-    cycle_manager.update_cycle_tracker(specimen, 'CQT', increment=False)  #update cycle tracker
+#print('Setting temperature for cell connection quality test...')
+#test_runner.bring_all_cells_to_temp_and_block_until_complete(temp=cqt_temp, timeout_mins=30)
+#test_runner.start_tests(channels, cqt_profile, cqt_savepath, filenames)
+#test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=4)  
+#for specimen in specimens:
+#    cycle_manager.update_cycle_tracker(specimen, 'CQT', increment=False)  #update cycle tracker
 #the above only passes if all cells reach the "finish" state within the timeout, otherwise the program rasies exception and exits
 
 #start all the RPTs

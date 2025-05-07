@@ -34,7 +34,7 @@ class BarcodeManager():
         chlcode_str = str(chlcode)
         if chlcode_str in database.keys():
             database.update({chlcode_str: barcode})
-            with open("barcode_database.json", "w") as json_file: 
+            with open(self.filepath, "w") as json_file: 
                 json.dump(database, json_file)
         else:
             raise Exception("invalid channel code")
