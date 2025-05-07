@@ -75,7 +75,7 @@ def build_new_profiles(params_dict, base_file_path, output_file_path):
     os.makedirs(dated_output_path, exist_ok=True)
 
     print(f"Creating new profiles in {dated_output_path}")
-    print("Spec ID\tCutoff Curr\tCell Capacity\tEX dchg time\tST dchg time")
+    print("Spec ID\t\tCutoff Curr\tCell Capacity\tEX dchg time\tST dchg time")
 
     for spec_id, params in params_dict.items():
         condition = spec_id[0:-2]  # get the condition from the specimen ID, chopping off the last two characters which represent replicate ID
@@ -112,8 +112,8 @@ def build_new_profiles(params_dict, base_file_path, output_file_path):
             shutil.copy(dc_profile_path, new_dc_profile_path)   #copy the base file to the new directory
             dc_editor = ProfileEditor(new_dc_profile_path)  #open the new file and edit the parameters
             dc_editor.update_test_profile_params(dc_params, dc_param_vals)  
-        
-        print(f"{spec_id}\t{params['cutoff_current']}\t{params['cell_capacity']}\t{dchg_times['EX']}\t{dchg_times['ST']}")
+            
+        print(f"{spec_id}\t\t{params['cutoff_current']:.2f} A\t\t{params['cell_capacity']:.2f} Ah\t\t{int(dchg_times['EX'])} s\t\t{int(dchg_times['ST'])} s")
 
 root = tk.Tk()
 root.withdraw()  # Hide the root window
