@@ -19,9 +19,13 @@ class MatExtractor:
 
         # Load the .mat file
         mat_contents = scipy.io.loadmat(self.file_path)
-
         #grab the last slice of the 3D array (most recent values)
-        vals = mat_contents.get('data')[:, :, -1]
+        if len(mat_contents.get('data').shape) == 3:
+            vals = mat_contents.get('data')[:, :, -1]
+        elif len(mat_contents.get('data').shape) == 2:
+            vals = mat_contents.get('data')[:, :]
+        else:
+            raise ValueError('.mat file not correct dimensions')
 
         #grab the column names from char array and convert to list - the value 0 is replaced with 'capacity'
         column_names = mat_contents.get('column_names').flatten()
