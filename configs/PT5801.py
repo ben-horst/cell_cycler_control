@@ -9,6 +9,8 @@ BANK_CHARGE_TEMPS = {
     5901: 40
 }
 
+DISCHARGE_TEMP = 40
+
 CHANNELS_PER_BANK = {   #active channel numbers for each bank
     2701: [270101, 270102, 270103, 270104],
     2702: [270201, 270202, 270205, 270206, 270207, 270208],

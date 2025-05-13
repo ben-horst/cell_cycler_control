@@ -10,6 +10,7 @@ test_title = 'PT5801_Cycles'
 cqt_profile = "G:/My Drive/Cell Test Profiles/Utilities/CQT_P45B_1C_4C.xml"
 cqt_savepath = "G:/My Drive/Cell Test Data/PT5801/CQTs"
 cqt_temp = 25
+cqt_filenames = []
 
 # Find the most recently modified folder within the parent folder
 folders = [os.path.join(profile_parent_folder, d) for d in os.listdir(profile_parent_folder) if os.path.isdir(os.path.join(profile_parent_folder, d))]
@@ -47,11 +48,10 @@ print('Specimen ID:\tlast cycle number\tlast cycle direction')
 print('---------------------------------------------------------------')
 
 #for each specimen, lookup the cycle number and direction from the cycle tracker json file
-filenames = []
 for specimen in specimens:
     #lookup cycle number for each specimen
     cycle, direction = cycle_manager.get_last_cycle(specimen)
-    filenames.append(f'{specimen}_cycles_{cycle}-{cycle + cycles_to_complete}')
+    cqt_filenames.append(f'{specimen}_CQT_after_{cycle}_cycles')
     print(f'{specimen}\t\t\t{cycle}\t\t\t{direction}')
 
 #check that all the profiles for these specimens exist in the selected folder
@@ -64,10 +64,6 @@ for specimen in specimens:
             raise ValueError(f"Profile {profile_name} not found in {profile_folder}.")
 print('/nAll profiles found for all specimens!/n')
 
-print('Filenames to be created:')
-for filename in filenames:
-    print(filename)
-
 input('/nPress enter to continue with test execution.')
 
 test_runner = TestRunner(channels, test_title)
@@ -76,13 +72,60 @@ barcodes = test_runner.barcodes
 #perform connection quality check
 print('Setting temperature for cell connection quality test...')
 test_runner.bring_all_cells_to_temp_and_block_until_complete(temp=cqt_temp, timeout_mins=30)
-test_runner.start_tests(channels, cqt_profile, cqt_savepath, filenames)
+test_runner.start_tests(channels, cqt_profile, cqt_savepath, cqt_filenames)
 test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=4)  
 for specimen in specimens:
    cycle_manager.update_cycle_tracker(specimen, 'CQT', increment=False)  #update cycle tracker
+#the above only passes if all cells reach the "finish" state within the timeout, otherwise the program rasies exception and exits
+print('\nCQT successful! Bringing cells to target charge temp...')
 
-#set bank to charge temp and wait
-#charge all cells
-# set bank to discharge temp and wait
-#discharge all cells
-#repeat
+cycles_completed = 0
+
+while cycles_completed < cycles_to_complete:
+    #set bank to charge temp and wait
+    test_runner.bring_all_cells_to_temp_and_block_until_complete(temp=CONFIG.BANK_CHARGE_TEMPS[bank_request], timeout_mins=30)
+
+    #charge all cells
+    print('Starting charge tests...')
+    print('Specimen ID:\tChannel ID\tCycle\tCharge Type')
+    for specimen in specimens:
+        current_cycle, direction = cycle_manager.get_last_cycle(specimen)       #checks to see the last cycle
+        charge_type = cycle_manager.get_charge_type(current_cycle, specimen)    #pulls from the cycle lookup table to see if it is a fast or slow charge
+        charge_profile = f'{specimen}_{charge_type}.xml'
+        charge_profile_path = f'{profile_folder}/{charge_profile}'       #builds the path to the charge profile
+        channel = CONFIG.CHANNELS_PER_BANK[bank_request][specimens.index(specimen)]  #finds the channel for the specimen
+        charge_filename = f'{specimen}_cycle_{current_cycle}_chg'
+        print(f'{specimen}\t\t{channel}\t\t{current_cycle}\t{charge_type}')
+        test_runner.start_tests([channel], charge_profile_path, savepath, charge_filename)   #starts the charge tests
+    test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=300)
+    print(f'Charge event {cycles_completed}/{cycles_to_complete} complete for all specimens')
+    for specimen in specimens:
+        cycle_manager.update_cycle_tracker(specimen, 'CHG', increment=False)  #update cycle tracker - INCREMENTS ONLY AT THE DISCHARGE EVENT
+
+    # set bank to discharge temp and wait
+    test_runner.bring_all_cells_to_temp_and_block_until_complete(temp=CONFIG.DISCHARGE_TEMP, timeout_mins=30)
+
+    #discharge all cells
+    print('Starting discharge tests...')
+    print('Specimen ID:\tChannel ID\tCycle\tDischarge Type')
+    for specimen in specimens:
+        current_cycle, direction = cycle_manager.get_last_cycle(specimen)       #checks to see the last cycle
+        discharge_type = cycle_manager.get_discharge_type(current_cycle, specimen)    #pulls from the cycle lookup table to see if it is a fast or slow charge
+        discharge_profile = f'{specimen}_{discharge_type}.xml'
+        discharge_profile_path = f'{profile_folder}/{discharge_profile}'       #builds the path to the charge profile
+        channel = CONFIG.CHANNELS_PER_BANK[bank_request][specimens.index(specimen)]  #finds the channel for the specimen
+        discharge_filename = f'{specimen}_cycle_{current_cycle}_dchg'
+        print(f'{specimen}\t\t{channel}\t\t{current_cycle}\t{discharge_type}')
+        test_runner.start_tests([channel], discharge_profile_path, savepath, discharge_filename)   #starts the charge tests
+    test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=120)
+    print(f'Discharge event {cycles_completed}/{cycles_to_complete} complete for all specimens')
+    for specimen in specimens:
+        cycle_manager.update_cycle_tracker(specimen, 'DCHG', increment=True)  #update cycle tracker - INCREMENTS ONLY AT THE DISCHARGE EVENT
+    #increment cycle counter and repeat
+    cycles_completed += 1
+    print(f'Completed {cycles_completed} cycles out of {cycles_to_complete}')
+
+print('All cycles complete!')
+test_runner.send_email(f'{test_title} Test Complete',
+                        f'''{cycles_to_complete} cycles completed for PT-5801.
+                        All data saved to {savepath}''')
