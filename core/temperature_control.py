@@ -4,13 +4,22 @@ import serial
 import time
 class TemperatureController:
     def __init__(self, port, baudrate=115200, timeout=1):
-        self.serial_port = serial.Serial(port, baudrate=baudrate, bytesize=8, parity='N', stopbits=1, timeout=timeout)
+        self.port = port
+        self.baudrate = baudrate
+        self.timeout = timeout
+        self.open_comport()
+        #self.close_comport()
     def __str__(self):
         return f'Chiller controller object on comport {self.serial_port}'
+    def open_comport(self):
+        self.serial_port = serial.Serial(self.port, baudrate=self.baudrate, bytesize=8, parity='N', stopbits=1, timeout=self.timeout)
+    def close_comport(self):
+        self.serial_port.close()
     def set_temperature(self, temperature):
         command = f"SS{temperature}"
         self._send_command(command)
         response = self.serial_port.readline().decode().strip()
+        self.close_comport()
         return response
     def read_temperature(self):
         self._send_command("RT")
@@ -27,18 +36,12 @@ class TemperatureController:
                 response = float(response)
             except:
                 print('bad chiller message')
+        self.close_comport()
         return response
-    def wait_for_temperature(self, target_temperature, threshold, timeout=None):
-        start_time = time.time()
-
-        while True:
-            current_temperature = float(self.read_temperature())
-            if current_temperature > (target_temperature - threshold) and current_temperature < (target_temperature + threshold):
-                break
-
-            if timeout is not None and (time.time() - start_time) > timeout:
-                raise TimeoutError("Timeout waiting for the target temperature")
-            time.sleep(5)  # Adjust the sleep interval as needed
-        return current_temperature
     def _send_command(self, command):
-        self.serial_port.write(command.encode() + b'\r')
+        if self.serial_port is None or not self.serial_port.is_open:
+            self.open_comport()
+        try:
+            self.serial_port.write(command.encode() + b'\r')
+        except serial.SerialException as e:
+            print(f'Serial Error: {e}')

@@ -62,9 +62,9 @@ for specimen in specimens:
         profile_path = f'{profile_folder}/{profile_name}'
         if not os.path.isfile(profile_path):
             raise ValueError(f"Profile {profile_name} not found in {profile_folder}.")
-print('/nAll profiles found for all specimens!/n')
+print('\nAll profiles found for all specimens!\n')
 
-input('/nPress enter to continue with test execution.')
+input('\nPress enter to continue with test execution.')
 
 test_runner = TestRunner(channels, test_title)
 barcodes = test_runner.barcodes
@@ -123,9 +123,16 @@ while cycles_completed < cycles_to_complete:
         cycle_manager.update_cycle_tracker(specimen, 'DCHG', increment=True)  #update cycle tracker - INCREMENTS ONLY AT THE DISCHARGE EVENT
     #increment cycle counter and repeat
     cycles_completed += 1
-    print(f'Completed {cycles_completed} cycles out of {cycles_to_complete}')
+    print(f'Completed {cycles_completed} cycles out of {cycles_to_complete} on bank {bank_request}')
 
 print('All cycles complete!')
-test_runner.send_email(f'{test_title} Test Complete',
-                        f'''{cycles_to_complete} cycles completed for PT-5801.
-                        All data saved to {savepath}''')
+
+summary_table = ''
+
+message = f'''{cycles_to_complete} cycles completed successfully for cycle accumulation of PT-5801. All data saved to {savepath}.
+                       \n\nBank tested: {bank_request}
+                       \n\nSpecimens tested: {specimens}
+                       \n\nCells Tested: {barcodes}
+                       \n\nSpecimen\tBarcode\tChannel\tCycle Count'''
+
+test_runner.send_email(f'{test_title} Test Complete', message)
