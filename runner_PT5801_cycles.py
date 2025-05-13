@@ -127,12 +127,16 @@ while cycles_completed < cycles_to_complete:
 
 print('All cycles complete!')
 
-summary_table = ''
+summary_table = 'Specimen\tBarcode\tChannel\tLast Cycle\tLast Event\n'
+for specimen in specimens:
+    last_cycle, last_event = cycle_manager.get_last_cycle(specimen)       #checks to see the last cycle
+    chan = CONFIG.CHANNELS_PER_BANK[bank_request][specimens.index(specimen)]  #finds the channel for the specimen
+    summary_table += f'{specimen}\t\t{barcodes[chan]}\t\t{chan}\t\t{last_cycle}\t\t{last_event}\n'
 
 message = f'''{cycles_to_complete} cycles completed successfully for cycle accumulation of PT-5801. All data saved to {savepath}.
                        \n\nBank tested: {bank_request}
                        \n\nSpecimens tested: {specimens}
                        \n\nCells Tested: {barcodes}
-                       \n\nSpecimen\tBarcode\tChannel\tCycle Count'''
+                       \n\n{summary_table}'''
 
-test_runner.send_email(f'{test_title} Test Complete', message)
+test_runner.send_email(f'{test_title} Complete', message)
