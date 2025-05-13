@@ -1,8 +1,6 @@
 import configs.PT5801 as CONFIG
 from core.test_runner import TestRunner
 from core.cycle_manager_PT5801 import CycleManager
-import tkinter as tk
-from tkinter import filedialog
 import os
 
 profile_parent_folder = "G:/My Drive/Cell Test Profiles/Cycles/PT5801_tuned_profiles"
@@ -13,12 +11,12 @@ cqt_profile = "G:/My Drive/Cell Test Profiles/Utilities/CQT_P45B_1C_4C.xml"
 cqt_savepath = "G:/My Drive/Cell Test Data/PT5801/CQTs"
 cqt_temp = 25
 
-root = tk.Tk()
-root.withdraw()  # Hide the root window
-
-profile_folder = filedialog.askdirectory(initialdir=profile_parent_folder, title="Select Profile Folder")
-if not profile_parent_folder:
-    raise ValueError("No folder selected. Exiting.")
+# Find the most recently modified folder within the parent folder
+folders = [os.path.join(profile_parent_folder, d) for d in os.listdir(profile_parent_folder) if os.path.isdir(os.path.join(profile_parent_folder, d))]
+if not folders:
+    raise ValueError("No folders found in the parent folder.")
+profile_folder = max(folders, key=os.path.getmtime)
+print(f"Folder for profiles: {profile_folder}")
 
 #prompt user for which bank to run
 #TODO: add the ability to run multiple banks from one script, for now only one bank at a time
@@ -45,7 +43,7 @@ if cycles_to_complete <= 0:
 
 cycle_manager = CycleManager()
 print('\nSpecimen cycle counts from cycle tracker json file:')
-print('Specimen ID:\tlast cycle number\tlast cycle direction\tfilename')
+print('Specimen ID:\tlast cycle number\tlast cycle direction')
 print('---------------------------------------------------------------')
 
 #for each specimen, lookup the cycle number and direction from the cycle tracker json file
@@ -64,13 +62,13 @@ for specimen in specimens:
         profile_path = f'{profile_folder}/{profile_name}'
         if not os.path.isfile(profile_path):
             raise ValueError(f"Profile {profile_name} not found in {profile_folder}.")
-print('All profiles found for all specimens!')
+print('/nAll profiles found for all specimens!/n')
 
 print('Filenames to be created:')
 for filename in filenames:
     print(filename)
 
-input('Press enter to continue with test execution.')
+input('/nPress enter to continue with test execution.')
 
 test_runner = TestRunner(channels, test_title)
 barcodes = test_runner.barcodes
