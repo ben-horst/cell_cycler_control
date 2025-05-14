@@ -9,16 +9,18 @@ class CycleManager:
         self.cycle_lookup_file = "./configs/PT5801_cycle_lookup.json"
         self.cycle_tracker_file = "./configs/PT5801_cycle_tracker.json"
 
-    def get_charge_type(self, cycle_number, condition):
-        #returns the charge type for the specified cycle number and condition
+    def get_charge_type(self, cycle_number, specimen_id):
+        #returns the charge type for the specified cycle number and specid
+        condition = specimen_id[:-2]
         with open(self.cycle_lookup_file, 'r') as f:
             cycle_lookup = json.load(f)
         is_slow_charge = cycle_lookup[condition]['chg_slow'][cycle_number]
         
         return 'sc' if is_slow_charge else 'fc'
 
-    def get_discharge_type(self, cycle_number, condition):
-        #returns the discharge type for the specified cycle number and condition
+    def get_discharge_type(self, cycle_number, specimen_id):
+        #returns the discharge type for the specified cycle number and specid
+        condition = specimen_id[:-2]
         with open(self.cycle_lookup_file, 'r') as f:
             cycle_lookup = json.load(f)
         is_extended_discharge = cycle_lookup[condition]['dchg_ex'][cycle_number]
@@ -40,8 +42,8 @@ class CycleManager:
 
     def update_cycle_tracker(self, specimen_id, direction, increment=False):
         #updates the cycle tracker json file with the last cycle completed for the specified specimen and direction (charge/discharge)
-        if direction not in ['CHG', 'DCHG', 'RPT', 'CQT']:
-            raise ValueError(f"Invalid direction '{direction}'. Must be 'CHG', 'DCHG', 'RPT', or 'CQT'.")
+        if direction not in ['CHG', 'DCHG', 'RPT', 'CQT', 'STRG']:
+            raise ValueError(f"Invalid direction '{direction}'. Must be 'CHG', 'DCHG', 'RPT', 'CQT', 'STRG'.")
         
         with open(self.cycle_tracker_file, 'r') as f:
             cycle_tracker = json.load(f)

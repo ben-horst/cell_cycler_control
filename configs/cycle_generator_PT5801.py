@@ -69,6 +69,7 @@ def generate_cycle_tracker():
         json.dump(cycle_tracker, f, indent=4)
     print(f"Cycle tracker file generated and saved to {cycle_tracker_file}.")
 
-
+print('blocking this to prevent accidental overwrite')
+exit()
 generate_cycle_lookup_table()
 generate_cycle_tracker()
