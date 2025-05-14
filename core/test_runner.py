@@ -32,8 +32,9 @@ class TestRunner:
         bank_channels = {}
         for bank in self.banks:
             channels_in_bank = []
-            for i in range(1, 9):
-                channels_in_bank.append(bank * 100 + i)
+            for channel in self.all_channels:
+                if channel // 100 == bank:  #add active channels into a dictionary per bank
+                    channels_in_bank.append(channel)
             bank_channels.update({bank: channels_in_bank})
         return bank_channels
     
