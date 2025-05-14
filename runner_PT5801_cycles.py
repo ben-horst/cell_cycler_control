@@ -1,6 +1,7 @@
 import configs.PT5801 as CONFIG
 from core.test_runner import TestRunner
 from core.cycle_manager_PT5801 import CycleManager
+from core.progress_report_PT5801 import ProgressReporter
 import os
 
 profile_parent_folder = "G:/My Drive/Cell Test Profiles/Cycles/PT5801_tuned_profiles"
@@ -49,8 +50,8 @@ if cycles_to_complete <= 0:
 
 cycle_manager = CycleManager()
 print(f'\nSpecimen cycle counts from cycle tracker json file for bank {bank_request}:')
-print('Specimen ID:\tlast cycle number\tlast cycle direction')
 print('---------------------------------------------------------------')
+print('Specimen ID:\tlast cycle number\tlast cycle direction')
 
 #for each specimen, lookup the cycle number and direction from the cycle tracker json file
 for specimen in specimens:
@@ -88,10 +89,11 @@ cycles_completed = 0
 
 while cycles_completed < cycles_to_complete:
     #set bank to charge temp and wait
-    test_runner.bring_all_cells_to_temp_and_block_until_complete(temp=CONFIG.BANK_CHARGE_TEMPS[bank_request], timeout_mins=30, verbose=False)
+    test_runner.bring_all_cells_to_temp_and_block_until_complete(temp=CONFIG.BANK_CHARGE_TEMPS[bank_request], timeout_mins=60, verbose=False)
 
     #charge all cells
     print(f'Starting charge {cycles_completed+1}/{cycles_to_complete} on bank {bank_request}...')
+    print('---------------------------------------------------------------')
     print('Specimen ID:\tChannel ID\tCycle\tCharge Type\tStart Result')
     for specimen in specimens:
         last_cycle, direction = cycle_manager.get_last_cycle(specimen)       #checks to see the last cycle
@@ -109,10 +111,11 @@ while cycles_completed < cycles_to_complete:
         cycle_manager.update_cycle_tracker(specimen, 'CHG', increment=False)  #update cycle tracker - INCREMENTS ONLY AT THE DISCHARGE EVENT
 
     # set bank to discharge temp and wait
-    test_runner.bring_all_cells_to_temp_and_block_until_complete(temp=CONFIG.DISCHARGE_TEMP, timeout_mins=30, verbose=False)
+    test_runner.bring_all_cells_to_temp_and_block_until_complete(temp=CONFIG.DISCHARGE_TEMP, timeout_mins=60, verbose=False)
 
     #discharge all cells
     print(f'Starting discharge {cycles_completed+1}/{cycles_to_complete} on bank {bank_request}...')
+    print('---------------------------------------------------------------')
     print('Specimen ID:\tChannel ID\tCycle\tDischarge Type\tStart Result')
     for specimen in specimens:
         last_cycle, direction = cycle_manager.get_last_cycle(specimen)       #checks to see the last cycle
@@ -143,8 +146,8 @@ for specimen in specimens:
 #the above only passes if all cells reach the "finish" state within the timeout, otherwise the program rasies exception and exits
 print('\nStorage Charge Complete.\n')
 
-
-
+print('\nSpecimen status after tests.\n')
+print('---------------------------------------------------------------')
 summary_table = 'Specimen\tBarcode\t\tChannel\t\tLast Cycle\tLast Event\n'
 for specimen in specimens:
     last_cycle, last_event = cycle_manager.get_last_cycle(specimen)       #checks to see the last cycle
@@ -154,6 +157,11 @@ for specimen in specimens:
 
 print(summary_table)
 
+#generate csv progress report and save copy of json tracker file
+progress_reporter = ProgressReporter()
+progress_reporter.generate_progress_report_csv()
+progress_reporter.save_copy_cycle_tracker_json()
+
 message = f'''{cycles_to_complete} cycles completed successfully for cycle accumulation of PT-5801. All data saved to {savepath}.
                        \n\nBank tested: {bank_request}
                        \n\nSpecimens tested: {specimens}
@@ -161,3 +169,5 @@ message = f'''{cycles_to_complete} cycles completed successfully for cycle accum
                        \n\n{summary_table}'''
 
 test_runner.send_email(f'{test_title} Complete', message)
+
+print('Test complete. Exitting.')
