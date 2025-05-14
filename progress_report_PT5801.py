@@ -1,15 +1,51 @@
 import configs.PT5801 as CONFIG
 from core.cycle_manager_PT5801 import CycleManager
+import csv
+import os
+from datetime import datetime
+
+savepath = "G:/My Drive/Cell Test Data/PT5801/Progress_Reports"
 
 cycle_manager = CycleManager()
 
 input('This script generates a progress report and saves a copy of the cycle_tracker json. Press enter to continue.')
 
-all_specimens = 
+all_specimens = []
+for specimens in CONFIG.SPECIMENS_PER_BANK.values():
+    all_specimens.extend(specimens)
 
-summary_table = 'Specimen\tBarcode\t\tChannel\t\tLast Cycle\tLast Event\n'
-for specimen in specimens:
-    last_cycle, last_event = cycle_manager.get_last_cycle(specimen)       #checks to see the last cycle
-    chan = CONFIG.CHANNELS_PER_BANK[bank_request][specimens.index(specimen)]  #finds the channel for the specimen
-    barcode = barcodes[specimens.index(specimen)]
-    summary_table += f'{specimen}\t\t{barcode}\t{chan}\t\t{last_cycle}\t\t{last_event}\n'
+all_channels = []
+for channels in CONFIG.CHANNELS_PER_BANK.values():
+    all_channels.extend(channels)
+
+last_cycles = []
+last_directions = []
+last_datetimes = []
+for specimen in all_specimens:
+    cycle, direction = cycle_manager.get_last_cycle(specimen)
+    last_cycles.append(cycle)
+    last_directions.append(direction)
+    last_datetime = cycle_manager.get_last_cycle_datetime(specimen)
+    last_datetimes.append(last_datetime)
+
+data = list(zip(all_specimens, all_channels, last_cycles, last_directions, last_datetimes))
+
+header = ['Specimen ID', 'Channel', 'Last Cycle Number', 'Last Cycle Direction', 'Last Cycle Datetime']
+os.makedirs(savepath, exist_ok=True)
+now_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+filename = os.path.join(savepath, f"progress_report_{now_str}.csv")
+with open(filename, mode='w', newline='', encoding='utf-8') as f:
+    writer = csv.writer(f)
+    writer.writerow(header)
+    writer.writerows(data)
+print(f"Progress report saved to {filename}")
+
+# Save a copy of the cycle_tracker json to the same directory
+cycle_tracker_json_path = cycle_manager.cycle_tracker_file
+if os.path.isfile(cycle_tracker_json_path):
+    json_copy_name = os.path.join(savepath, f"cycle_tracker_{now_str}.json")
+    with open(cycle_tracker_json_path, 'r', encoding='utf-8') as src, open(json_copy_name, 'w', encoding='utf-8') as dst:
+        dst.write(src.read())
+    print(f"cycle_tracker json saved to {json_copy_name}")
+else:
+    print("cycle_tracker json file not found.")

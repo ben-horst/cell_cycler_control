@@ -59,7 +59,7 @@ class TestRunner:
                 self.send_email(f'{self.test_title} Test Aborted - Temperature Timeout', f'Cells failed to reach target temperature within {timeout_mins} minutes - aborting test. Bank temp_okay status: {temps_ok}')
                 raise RuntimeError(f'failed to reach target temperature within {timeout_mins} minutes - aborting test')
             if all(temps_ok.values()):
-                print(f'all cells reached within {temp_tolerance} deg of target temperature')
+                print(f'all cells reached within {temp_tolerance} deg of target temperature in {(time.time() - start_time) / 60:0.1f} mins')
                 break
             for bank in self.banks:
                 if not temps_ok[bank]:  #if the cells haven't yet reached the required temp

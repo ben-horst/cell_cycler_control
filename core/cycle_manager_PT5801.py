@@ -39,6 +39,18 @@ class CycleManager:
         last_cycle_direction = cycle_tracker[specimen_id]['last_cycle_direction']
         
         return last_cycle_number, last_cycle_direction
+    
+    def get_last_cycle_datetime(self, specimen_id):
+        #returns the last cycle datetime for the specified specimen from the cycle tracker json file
+        with open(self.cycle_tracker_file, 'r') as f:
+            cycle_tracker = json.load(f)
+
+        if specimen_id not in cycle_tracker:
+            raise Exception(f"Specimen ID {specimen_id} not found in cycle tracker. Please check the specimen ID and try again.")
+
+        last_cycle_datetime = cycle_tracker[specimen_id]['last_cycle_datetime']
+        
+        return last_cycle_datetime
 
     def update_cycle_tracker(self, specimen_id, direction, increment=False):
         #updates the cycle tracker json file with the last cycle completed for the specified specimen and direction (charge/discharge)
