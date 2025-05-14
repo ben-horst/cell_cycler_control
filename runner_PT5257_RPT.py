@@ -1,9 +1,9 @@
 #runs a multitemp water-cooled P30B and P45B cells, then charge/discharge to storage SOCs - see PT-5257
 
-from cell_cycler import CellCycler
-from chiller_controller import ChillerController
+from core.cell_cycler import CellCycler
+from core.chiller_controller import ChillerController
+from core.gmail import gmail
 import time
-import gmail
 
 email = gmail.gmail()
 

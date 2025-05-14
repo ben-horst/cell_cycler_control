@@ -2,7 +2,7 @@ import socket
 import time
 import logging
 import xml.etree.ElementTree as ET
-from barcode_manager import BarcodeManager
+from core.barcode_manager import BarcodeManager
 
 class CellCycler():
     """this is a class to control and communicate with Neware cell cyclers over their TCP API"""
@@ -202,31 +202,3 @@ class CellCycler():
         step_matches = (step == desired_step for step in steps)
         return all(step_matches)
     
-    def update_test_profile_params(self, profile_path, params_to_edit, new_params):
-            """accepts a dictionary of parameters to edit, with each entry in the form
-            "human readable param name": ["step#", "keyword"] and dicctionary of new values for those parameters
-            with the same keys as params_to_edit along with path to xml file to edit"""
-            prsr = ET.XMLParser(encoding="utf-8")
-            tree = ET.parse(profile_path, parser=prsr)
-            root = tree.getroot()
-            for match in root.iter('Scale'):
-                scale = int(match.get('Value'))
-            params_updated = 0
-            for key, val in params_to_edit.items():
-                stepname = val[0]
-                keywordname = val[1]
-                for step in root.iter(stepname):       #go through all steps and look for matched string
-                    for keyword in step.iter(keywordname):      #go through all the lines and looks for the keyword
-                        val_from_user = new_params.get(key)
-                        if val_from_user is None:
-                            raise Exception("missing new parameter")
-                        else:
-                            if keyword.tag == 'Cap':    #since cap is stored in mAs, but user enters Ah
-                                newval = str(int(float(val_from_user) * 3600 * 1000 * scale))
-                            #can set other transforms for voltage, etc as needed
-                            else:
-                                newval = str(float(val_from_user) * scale)
-                            keyword.set('Value', newval)
-                            params_updated = params_updated + 1
-            tree.write(profile_path)
-            return params_updated

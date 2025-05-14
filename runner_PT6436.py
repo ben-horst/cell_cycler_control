@@ -1,4 +1,4 @@
-from test_runner import TestRunner
+from core.test_runner import TestRunner
 
 all_channels = [590107, 590108]
 profile_charge_P45B00071 = "C:/Users/cell.test/Documents/Current Test Profiles/P45_improved_OCV/P45B00071_OCV_V1.0_chg.xml"
