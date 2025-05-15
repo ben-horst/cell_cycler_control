@@ -6,11 +6,8 @@ temp = 24
 
 chiller = TemperatureController(port)
 
-print('set #1')
 chiller.set_temperature(temp)
-time.sleep(60)
-print('set #2')
-chiller.set_temperature(temp)
+print(chiller.read_temperature())
 
 #COM3 - 5901
 #COM4 - 5801
