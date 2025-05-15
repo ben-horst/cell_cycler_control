@@ -41,8 +41,11 @@ print(f'All specimens in bank {bank_request}: {specimens}')
 specimens_to_skip = input("Enter the specimens to skip, separated by commas, or press enter to skip no specimens: ")
 if specimens_to_skip:
     specimens_to_skip = [specimen.strip() for specimen in specimens_to_skip.split(',')]
-    print(f'specimens to skip: {specimens_to_skip}')
+    channels_to_skip = [channels[specimens.index(specimen)] for specimen in specimens_to_skip if specimen in specimens]
+    print(f'specimens to skip: {specimens_to_skip} on channels: {channels_to_skip}')
+    #remove the specimens to skip from the list of specimens and channels
     specimens = [specimen for specimen in specimens if specimen not in specimens_to_skip]
+    channels = [channel for channel in channels if channel not in channels_to_skip]
 
 cycles_to_complete = int(input('Enter the number of cycles to complete: '))
 if cycles_to_complete <= 0:
