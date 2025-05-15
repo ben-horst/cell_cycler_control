@@ -18,8 +18,8 @@ class TemperatureController:
             self.serial_port.close()
             if not self.serial_port.is_open:
                 break
-            else:
-                attempt += 1
+            if attempt == retries:
+                print('failed to close comport')
     def set_temperature(self, temperature):
         command = f"SS{temperature}"
         self._send_command(command)
