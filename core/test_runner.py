@@ -102,7 +102,11 @@ class TestRunner:
         start_results = []
         if type(filenames) == str:  #if a single filename is provided
             filename = filenames
-            start_data = self.cycler.start_channels(channels, profile, savepath, filename)
+            try:
+                start_data = self.cycler.start_channels(channels, profile, savepath, filename)
+            except:
+                self.send_email(f'{self.test_title} Test Aborted - Cycler Comms Failure.', f'Failed to send start request to channels {channels}')
+                raise RuntimeError(f'failed to send start request to channels {channels} - aborting test')
             for item in start_data:
                 start_results.append(item.get('start result'))
         else:   #if individual filenames are provided
@@ -110,7 +114,11 @@ class TestRunner:
                 raise ValueError('Number of filenames must match number of channels')
             else:
                 for filename, channel in zip(filenames, channels):
-                    start_data = self.cycler.start_channels([channel], profile, savepath, filename)
+                    try:
+                        start_data = self.cycler.start_channels([channel], profile, savepath, filename)
+                    except:
+                        self.send_email(f'{self.test_title} Test Aborted - Cycler Comms Failure.', f'Failed to send start request to channel {channel}')
+                        raise RuntimeError(f'failed to send start request to channel {channel} - aborting test')
                     for item in start_data:
                         start_results.append(item.get('start result'))
                     time.sleep(0.5) #small delay between transmissions
@@ -128,12 +136,16 @@ class TestRunner:
             if time.time() - start_time > timeout_mins * 60:
                 self.send_email(f'{self.test_title} Test Aborted - Cell Completion Timeout', f'Channels failed to complete tests within timeout of {timeout_mins} minutes ({timeout_mins/(60*24)} days) - aborting test.')
                 raise RuntimeError(f'failed to complete tests within timeout of {timeout_mins:.0f} minutes ({timeout_mins/(60*24):.2f} days) - aborting test')
-            chan_data = self.cycler.get_channels_current_data(self.all_channels)
-            cell_states = []
-            cell_temps = []
-            for chan in chan_data:
-                cell_states.append(chan.get('workstatus'))
-                cell_temps.append(float(chan.get('auxtemp')))
+            try:
+                chan_data = self.cycler.get_channels_current_data(self.all_channels)
+                cell_states = []
+                cell_temps = []
+                for chan in chan_data:
+                    cell_states.append(chan.get('workstatus'))
+                    cell_temps.append(float(chan.get('auxtemp')))
+            except:
+                self.send_email(f'{self.test_title} Test Aborted - Cycler Comms Failure.', f'Failed while requesting channel status on channels {self.all_channels}')
+                raise RuntimeError(f'failed while requesting channel status on channels {self.all_channels} - aborting test')
             print(f'channel states: {cell_states}  |  channel temps: {cell_temps}') if verbose else None
             if all(state == 'finish' for state in cell_states):
                 print(f'all channels finished in {(time.time() - start_time) / 60:0.1f} mins')
