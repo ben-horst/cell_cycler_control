@@ -47,10 +47,6 @@ if specimens_to_skip:
     specimens = [specimen for specimen in specimens if specimen not in specimens_to_skip]
     channels = [channel for channel in channels if channel not in channels_to_skip]
 
-cycles_to_complete = int(input('Enter the number of cycles to complete: '))
-if cycles_to_complete <= 0:
-    raise ValueError("Invalid number of cycles. Must be greater than 0.")
-
 cycle_manager = CycleManager()
 print(f'\nSpecimen cycle counts from cycle tracker json file for bank {bank_request}:')
 print('---------------------------------------------------------------')
@@ -73,7 +69,11 @@ for specimen in specimens:
             raise ValueError(f"Profile {profile_name} not found in {profile_folder}.")
 print('\nAll profiles found for all specimens!\n')
 
-input('\nPress enter to continue with test execution.')
+cycles_to_complete = int(input('Enter the number of cycles to complete: '))
+if cycles_to_complete <= 0:
+    raise ValueError("Invalid number of cycles. Must be greater than 0.")
+
+print('')
 
 test_runner = TestRunner(channels, test_title)
 barcodes = test_runner.barcodes
