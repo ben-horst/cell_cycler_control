@@ -1,17 +1,20 @@
 from core.temperature_control import TemperatureController
 import time
 
-port = 'COM8'
-temp = 24
+port = 'COM15'
+temp = 35
 
 chiller = TemperatureController(port)
 
 chiller.set_temperature(temp)
 print(chiller.read_temperature())
 
-#COM3 - 5901
-#COM4 - 5801
-#COM5 - 2701
-#COM6 - 2702
-#COM7 - 5201
-#COM8 - 5202
+"""
+2701 - COM13
+2702 - COM9
+5201 - COM14
+5202 - COM12
+5801 - COM11
+5901 - COM15
+5902 - COM10
+"""
