@@ -1,0 +1,57 @@
+#stores the barcodes of the specimens, with a list containing the storage temperature and storage SOC
+
+SPECIMENS = {
+    'P45B00011': {'temp': 60, 'soc': 0},
+    'P45B00012': {'temp': 60, 'soc': 25},
+    'P45B00013': {'temp': 60, 'soc': 50},
+    'P45B00014': {'temp': 60, 'soc': 60},
+    'P45B00015': {'temp': 60, 'soc': 70},
+    'P45B00016': {'temp': 60, 'soc': 80},
+    'P45B00017': {'temp': 60, 'soc': 90},
+    'P45B00018': {'temp': 60, 'soc': 100},
+
+    'P45B00019': {'temp': 30, 'soc': 0},
+    'P45B00020': {'temp': 30, 'soc': 25},
+    'P45B00021': {'temp': 30, 'soc': 50},
+    'P45B00022': {'temp': 30, 'soc': 60},
+    'P45B00023': {'temp': 30, 'soc': 70},
+    'P45B00024': {'temp': 30, 'soc': 80},
+    'P45B00025': {'temp': 30, 'soc': 90},
+    'P45B00026': {'temp': 30, 'soc': 100},
+
+    'P45B00027': {'temp': 0, 'soc': 0},
+    'P45B00028': {'temp': 0, 'soc': 25},
+    'P45B00029': {'temp': 0, 'soc': 50},
+    'P45B00030': {'temp': 0, 'soc': 60},
+    'P45B00031': {'temp': 0, 'soc': 70},
+    'P45B00032': {'temp': 0, 'soc': 80},
+    'P45B00033': {'temp': 0, 'soc': 90},
+    'P45B00034': {'temp': 0, 'soc': 100},
+
+    'P30B00011': {'temp': 60, 'soc': 0},
+    'P30B00012': {'temp': 60, 'soc': 25},
+    'P30B00013': {'temp': 60, 'soc': 50},
+    'P30B00014': {'temp': 60, 'soc': 60},
+    'P30B00015': {'temp': 60, 'soc': 70},
+    'P30B00016': {'temp': 60, 'soc': 80},
+    'P30B00017': {'temp': 60, 'soc': 90},
+    'P30B00018': {'temp': 60, 'soc': 100},
+
+    'P30B00019': {'temp': 30, 'soc': 0},
+    'P30B00020': {'temp': 30, 'soc': 25},
+    'P30B00021': {'temp': 30, 'soc': 50},
+    'P30B00022': {'temp': 30, 'soc': 60},
+    'P30B00023': {'temp': 30, 'soc': 70},
+    'P30B00024': {'temp': 30, 'soc': 80},
+    'P30B00025': {'temp': 30, 'soc': 90},
+    'P30B00026': {'temp': 30, 'soc': 100},
+
+    'P30B00027': {'temp': 0, 'soc': 0},
+    'P30B00028': {'temp': 0, 'soc': 25},
+    'P30B00029': {'temp': 0, 'soc': 50},
+    'P30B00030': {'temp': 0, 'soc': 60},
+    'P30B00031': {'temp': 0, 'soc': 70},
+    'P30B00032': {'temp': 0, 'soc': 80},
+    'P30B00033': {'temp': 0, 'soc': 90},
+    'P30B00034': {'temp': 0, 'soc': 100}
+}
