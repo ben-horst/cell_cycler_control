@@ -173,4 +173,4 @@ message = f'''{cycles_to_complete} cycles completed successfully for cycle accum
 
 test_runner.send_email(f'{test_title} Complete', message)
 
-print('Test complete. Exitting.')
+print('Test complete. Exiting.')
