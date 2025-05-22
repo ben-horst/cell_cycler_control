@@ -3,7 +3,7 @@
 from core.test_runner import TestRunner
 import configs.PT5257 as CONFIG
 
-input("This script will run a multi-temp RPT for P30B and P45B cells, then charge to storage SOCs. Please ensure that 4 P45B cells are located in 580201-580204 and 4 P30B in 580205-580208.\n\nPress enter to continue")
+input("This script will run a multi-temp RPT for P30B and P45B cells, then charge to storage SOCs. Please ensure cells are loaded in bank 5802.\nPress enter to continue")
 cycle_number = input("enter number of aging days accumulated: ")
 
 test_title = 'PT5257_RPTs'
@@ -27,36 +27,36 @@ cqt_profile_P45 = "G:/My Drive/Cell Test Profiles/Utilities/CQT_P45B_1C_4C.xml"
 cqt_savepath = "G:/My Drive/Cell Test Data/PT5257/CQTs"
 cqt_temp = 25
 
-all_channels = channels_P45 = [580201, 580202, 580203, 580204, 580205, 580206, 580207, 580208]
-
+all_channels = [580201, 580202, 580203, 580204, 580205, 580206, 580207, 580208]
 temps = [20, 35, 50]
 
 test_runner = TestRunner(all_channels, test_title)
 barcodes = test_runner.barcodes
 specimens = {}
 for channel, barcode in zip(all_channels, barcodes):
-    storage_temp = CONFIG.SPECIMENS[barcode]['temp']
-    storage_soc = CONFIG.SPECIMENS[barcode]['soc']
     if barcode.startswith('P30B'):
         is_P30B = True
     elif barcode.startswith('P45B'):
         is_P30B = False
     else:
         raise ValueError(f'Barcode {barcode} does not start with P30B or P45B')
+    storage_temp = CONFIG.SPECIMENS[barcode]['temp']
+    storage_soc = CONFIG.SPECIMENS[barcode]['soc']
     specimens[channel] = {'barcode': barcode, 'storage_temp': storage_temp, 'storage_soc': storage_soc, 'is_P30B': is_P30B}
 
 
 print('Current loaded cells in bank 5802:')
 print('\n---------------------------------------------------------------')
-print('Channel:\tBarcode\Storage temp (degC)\tStorage SOC (%)')
+print('Channel\t\tBarcode\t\tStorage temp\tStorage SOC')
 
 for channel, data in specimens.items():
     barcode = data['barcode']
     storage_temp = data['storage_temp']
     storage_soc = data['storage_soc']
     is_P30B = data['is_P30B']
-    print(f'{channel}\t{barcode}\t{storage_temp}\t\t{storage_soc}')
+    print(f'{channel}\t\t{barcode}\t\t{storage_temp}\t\t{storage_soc}')
 
+input('/nPress enter to start connection quality test (CQT)')
 
 #perform connection quality check
 print('Setting temperature for cell connection quality test...')
@@ -78,17 +78,16 @@ for channel, data in specimens.items():
         test_runner.start_tests([channel], cqt_profile_P45, cqt_savepath, cqt_name, verbose=False)
 
 print('Waiting for CQTs to finish...')
-test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=4)  
+test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=4, verbose=False)  
 #the above only passes if all cells reach the "finish" state within the timeout, otherwise the program rasies exception and exits
 
 print('\nCQT successful!\n')
-
 
 for temp in temps:
     print(f'Bringing cells to {temp} degC for RPT')
     test_runner.bring_all_cells_to_temp_and_block_until_complete(temp=temp, timeout_mins=60, verbose=False)
     print('---------------------------------------------------------------')
-    print('Channel:\tBarcode\tStart Result')
+    print('Channel\t\tBarcode\t\tStart Result')
     for channel, data in specimens.items():
         barcode = data['barcode']
         storage_temp = data['storage_temp']
@@ -100,7 +99,7 @@ for temp in temps:
         else:
             rpt_name = f'{testname_base_P45}_RPT_at_{temp}_stored_at_{storage_soc}soc_{storage_temp}degC'
             result = test_runner.start_tests([channel], profile_RPT_P45, savepath_P45, rpt_name, verbose=False)
-        print(f'{channel}\t{barcode}\t{result[0]}')
+        print(f'{channel}\t\t{barcode}\t\t{result[0]}')
     print(f'Waiting for {temp} degC RPTs to finish...')
     test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=60*24*2, verbose=False)
        
@@ -108,7 +107,7 @@ for temp in temps:
 print('\nall RPTs completed - setting chiller to 25 C and charging cells to storage SOCs\n')
 test_runner.bring_all_cells_to_temp_and_block_until_complete(temp=25, timeout_mins=60, verbose=False)
 print('---------------------------------------------------------------')
-print('Channel:\tBarcode\tStorage SOC\tStart Result')
+print('Channel\t\tBarcode\t\tStorage SOC\tStart Result')
 
 for channel, data in specimens.items():
     barcode = data['barcode']
@@ -123,19 +122,19 @@ for channel, data in specimens.items():
         charge_testname = f'{testname_base_P45}_charge_to_{storage_soc}soc'
         charge_profile = f"{charge_profile_base_P45}_{storage_soc}SOC.xml"
         result = test_runner.start_tests([channel], charge_profile, savepath_P45, charge_testname, verbose=False)
-    print(f'{channel}\t{barcode}\t{storage_soc}\t\t{result[0]}')
+    print(f'{channel}\t\t{barcode}\t\t{storage_soc}\t\t{result[0]}')
 print('\nWaiting for storage charges to finish...')
 test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=60*4, verbose=False)
         
 print('All storage charges completed. Test completed.')
 
-summary_table = 'Channel:\tBarcode\Storage temp (degC)\tStorage SOC (%)'
+summary_table = 'Channel\t\tBarcode\t\tStorage temp\tStorage SOC'
 for channel, data in specimens.items():
     barcode = data['barcode']
     storage_temp = data['storage_temp']
     storage_soc = data['storage_soc']
     is_P30B = data['is_P30B']
-    summary_table += f'\n{channel}\t{barcode}\t{storage_temp}\t\t{storage_soc}'
+    summary_table += f'\n{channel}\t\t{barcode}\t\t{storage_temp}\t\t{storage_soc}'
 
 message = f'PT-5257 calendar aging multi-temp RPT completed for the following cells: \n{summary_table}\n Please return cells to aging chamber and start next test.'
 test_runner.send_email(f'{test_title} Complete', message)
