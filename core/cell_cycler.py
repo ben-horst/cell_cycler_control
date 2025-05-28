@@ -29,10 +29,14 @@ class CellCycler():
 
     def send_command(self, msg):
         time.sleep(self.__delay)
+        send_time = time.time()
         self._socket.send(msg.encode())
         time.sleep(self.__delay)
         try:
-            return self._socket.recv(38768).decode()
+            resp = self._socket.recv(38768).decode()
+            resp_time = time.time() - send_time
+            print(f"Response received in {resp_time:.2f} seconds")
+            return resp
         except:
             print("response timed out")
 

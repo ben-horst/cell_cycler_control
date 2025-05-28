@@ -18,7 +18,7 @@ class Gmail:
         if os.path.exists("./core/token.json"):
             self.creds = Credentials.from_authorized_user_file("./core/token.json", self.scopes)
         if not self.creds or not self.creds.valid:
-            print(self.creds.valid)
+            #print(self.creds.valid)
             if self.creds and self.creds.expired and self.creds.refresh_token:
                 self.creds.refresh(Request())
             else:

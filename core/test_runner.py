@@ -123,8 +123,11 @@ class TestRunner:
                         start_results.append(item.get('start result'))
                     time.sleep(0.5) #small delay between transmissions
         print('all start requests sent - waiting for responses') if verbose else None
-        time.sleep(10)
+        time.sleep(1)
         print(f'start results: {start_results})') if verbose else None
+        if any(result != 'ok' for result in start_results):
+            self.send_email(f'{self.test_title} Test Aborted - Cycler Start Failure', f'Some channels failed to start with responses: {start_results} on channels {channels} - aborting test.')
+            raise RuntimeError(f'some channels failed to start with responses: {start_results} on channels {channels} - aborting test')
         return start_results
 
     def wait_for_all_channels_to_finish_and_block_until_complete(self, timeout_mins=60*24*14, verbose=True):
