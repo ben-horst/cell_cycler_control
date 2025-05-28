@@ -1,4 +1,5 @@
 import socket
+import select
 import time
 import logging
 import xml.etree.ElementTree as ET
@@ -6,7 +7,7 @@ from core.barcode_manager import BarcodeManager
 
 class CellCycler():
     """this is a class to control and communicate with Neware cell cyclers over their TCP API"""
-    def __init__(self, ip_address="127.0.0.1", port=502, log_level=logging.INFO, timeout=1, delay=0, **kwargs):
+    def __init__(self, ip_address="127.0.0.1", port=502, log_level=logging.INFO, timeout=1, delay=0.01, **kwargs):
         """initialize comms on a specified address and port"""
         self.__ip_address = ip_address
         self.__port = port
@@ -34,8 +35,14 @@ class CellCycler():
         time.sleep(self.__delay)
         try:
             resp = self._socket.recv(38768).decode()
+            bytes_recvd = len(resp)
             resp_time = time.time() - send_time
-            print(f"Response received in {resp_time:.2f} seconds")
+            ready_to_read, _, _ = select.select([self._socket], [], [], 0)
+            if ready_to_read:
+                remng_bytes = len(self._socket.recv(38768, socket.MSG_PEEK))
+            else:
+                remng_bytes = 0
+            print(f"{bytes_recvd} bytes received in {1000*resp_time:.0f} ms - {remng_bytes} still in buffer")
             return resp
         except:
             print("response timed out")
@@ -104,7 +111,6 @@ class CellCycler():
         for cell in cells:
             cell_addresses = cell_addresses + (f'  <status ip="{self.__ip_address}" devtype="24" devid="{cell[0]}" subdevid="{cell[1]}" chlid="{cell[2]}">true</status>\n')
         msg = self.XML_HEADER + xml_command + cell_addresses + self.XML_TAIL
-        resp = self.send_command(msg)
         xml_string = self.send_command(msg)
         root = ET.fromstring(xml_string.replace('#',''))
         channel_data = []
@@ -123,7 +129,6 @@ class CellCycler():
         for cell in cells:
             cell_addresses = cell_addresses + (f'  <inquire ip="{self.__ip_address}" devtype="24" devid="{cell[0]}" subdevid="{cell[1]}" chlid="{cell[2]}">true</inquire>\n')
         msg = self.XML_HEADER + xml_command + cell_addresses + self.XML_TAIL
-        resp = self.send_command(msg)
         xml_string = self.send_command(msg)
         root = ET.fromstring(xml_string.replace('#',''))
         channel_data = []
