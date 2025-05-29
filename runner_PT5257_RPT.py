@@ -56,7 +56,7 @@ for channel, data in specimens.items():
     is_P30B = data['is_P30B']
     print(f'{channel}\t\t{barcode}\t\t{storage_temp}\t\t{storage_soc}')
 
-input('/nPress enter to start connection quality test (CQT)')
+input('\nPress enter to start connection quality test (CQT)')
 
 #perform connection quality check
 print('Setting temperature for cell connection quality test...')

@@ -1,5 +1,4 @@
 import socket
-import select
 import time
 import logging
 import xml.etree.ElementTree as ET
@@ -27,6 +26,8 @@ class CellCycler():
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._socket.settimeout(self.__timeout)
         self._socket.connect((self.__ip_address, self.__port))
+        client_ip, client_port = self._socket.getsockname()
+        print(f'client port: {client_port}')
 
     def send_command(self, msg):
         time.sleep(self.__delay)
@@ -34,16 +35,7 @@ class CellCycler():
         self._socket.send(msg.encode())
         time.sleep(self.__delay)
         try:
-            resp = self._socket.recv(38768).decode()
-            bytes_recvd = len(resp)
-            resp_time = time.time() - send_time
-            ready_to_read, _, _ = select.select([self._socket], [], [], 0)
-            if ready_to_read:
-                remng_bytes = len(self._socket.recv(38768, socket.MSG_PEEK))
-            else:
-                remng_bytes = 0
-            print(f"{bytes_recvd} bytes received in {1000*resp_time:.0f} ms - {remng_bytes} still in buffer")
-            return resp
+            return self._socket.recv(38768).decode()
         except:
             print("response timed out")
 

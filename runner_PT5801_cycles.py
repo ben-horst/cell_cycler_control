@@ -81,6 +81,9 @@ barcodes = test_runner.barcodes
 #perform connection quality check
 print('Setting temperature for cell connection quality test...')
 test_runner.bring_all_cells_to_temp_and_block_until_complete(temp=cqt_temp, timeout_mins=30, verbose=False)
+#make sure nothing is running
+print('Waiting for any tests to complete')
+test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=60, verbose=False)  
 test_runner.start_tests(channels, cqt_profile, cqt_savepath, cqt_filenames, verbose=False)
 test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=4, verbose=False)  
 for specimen in specimens:

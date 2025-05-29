@@ -140,6 +140,7 @@ class TestRunner:
                 self.send_email(f'{self.test_title} Test Aborted - Cell Completion Timeout', f'Channels failed to complete tests within timeout of {timeout_mins} minutes ({timeout_mins/(60*24)} days) - aborting test.')
                 raise RuntimeError(f'failed to complete tests within timeout of {timeout_mins:.0f} minutes ({timeout_mins/(60*24):.2f} days) - aborting test')
             try:
+                time.sleep(1) #small delay to prevent seeing channels "finished" before they started
                 chan_data = self.cycler.get_channels_current_data(self.all_channels)
                 cell_states = []
                 cell_temps = []
