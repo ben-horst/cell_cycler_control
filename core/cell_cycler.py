@@ -6,7 +6,7 @@ from core.barcode_manager import BarcodeManager
 
 class CellCycler():
     """this is a class to control and communicate with Neware cell cyclers over their TCP API"""
-    def __init__(self, ip_address="127.0.0.1", port=502, log_level=logging.INFO, timeout=1, delay=0.01, **kwargs):
+    def __init__(self, ip_address="localhost", port=9000, log_level=logging.INFO, timeout=1, delay=0.01, **kwargs):
         """initialize comms on a specified address and port"""
         self.__ip_address = ip_address
         self.__port = port
