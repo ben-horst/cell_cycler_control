@@ -10,7 +10,8 @@ CELL_CYCLER_HOST = "127.0.0.1"
 CELL_CYCLER_PORT = 502
 RECONNECT_DELAY = 5  # seconds
 MAX_MESSAGE_SIZE = 38768  # bytes
-DEFAULT_TIMEOUT = 1.0  # seconds
+SERVER_SIDE_TIMEOUT = 1.0  # seconds
+CLIENT_SIDE_TIMEOUT = 1.0
 
 # FIFO Queue: (client_socket, message)
 message_queue = queue.Queue()
@@ -23,7 +24,7 @@ def cell_cycler_worker():
         if cc_sock is None:
             try:
                 cc_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                cc_sock.settimeout(DEFAULT_TIMEOUT)
+                cc_sock.settimeout(SERVER_SIDE_TIMEOUT)
                 cc_sock.connect((CELL_CYCLER_HOST, CELL_CYCLER_PORT))
                 print("[*] Connected to cell cycler server")
             except Exception as e:
@@ -56,35 +57,51 @@ def cell_cycler_worker():
                 pass
             cc_sock = None
         finally:
-            client_socket.close()
+            pass
 
 def client_thread(client_socket, address):
     print(f"[+] Connected: {address}")
     try:
-        client_socket.settimeout(DEFAULT_TIMEOUT)
-        data = client_socket.recv(MAX_MESSAGE_SIZE)
+        client_socket.settimeout(CLIENT_SIDE_TIMEOUT)
 
-        if data:
-            message_queue.put((client_socket, data))
-        else:
-            client_socket.close()
+        while True:
+            try:
+                data = client_socket.recv(MAX_MESSAGE_SIZE)
+                if not data:
+                    print(f"[-] Client disconnected: {address}")
+                    break   #socket closed the connection
+                message_queue.put((client_socket, data))
+            except socket.timeout:
+                continue    #allow for socket timeouts
+
     except Exception as e:
         print(f"[!] Error with client {address}: {e}")
+    finally:
         client_socket.close()
+        print(f'[-] Socket closed at {address}')
 
 def start_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((HOST, PORT))
     server_socket.listen()
+    server_socket.settimeout(1.0)
 
     print(f"[*] Server listening on {HOST}:{PORT}")
 
     # Start persistent cell cycler worker thread
     threading.Thread(target=cell_cycler_worker, daemon=True).start()
 
-    while True:
-        client_sock, addr = server_socket.accept()
-        threading.Thread(target=client_thread, args=(client_sock, addr), daemon=True).start()
+    try:
+        while True:
+            try:
+                client_sock, addr = server_socket.accept()
+                threading.Thread(target=client_thread, args=(client_sock, addr), daemon=True).start()
+            except socket.timeout:
+                continue    #this allows periodic checking for a ctrl-c interrupt
+    except KeyboardInterrupt:
+        print('\n[!] Server shutting down...')
+    finally:
+        server_socket.close()
 
 if __name__ == "__main__":
     start_server()
