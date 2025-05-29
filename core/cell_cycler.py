@@ -6,7 +6,7 @@ from core.barcode_manager import BarcodeManager
 
 class CellCycler():
     """this is a class to control and communicate with Neware cell cyclers over their TCP API"""
-    def __init__(self, ip_address="127.0.0.1", port=502, log_level=logging.INFO, timeout=1, delay=0.01, **kwargs):
+    def __init__(self, ip_address="127.0.0.1", port=9000, log_level=logging.INFO, timeout=1, delay=0.01, **kwargs):
         """initialize comms on a specified address and port"""
         self.__ip_address = ip_address
         self.__port = port
@@ -27,7 +27,7 @@ class CellCycler():
         self._socket.settimeout(self.__timeout)
         self._socket.connect((self.__ip_address, self.__port))
         client_ip, client_port = self._socket.getsockname()
-        print(f'client port: {client_port}')
+        print(f'Connected to middle server with client port: {client_port}')
 
     def send_command(self, msg):
         time.sleep(self.__delay)
@@ -35,7 +35,8 @@ class CellCycler():
         self._socket.send(msg.encode())
         time.sleep(self.__delay)
         try:
-            return self._socket.recv(38768).decode()
+            resp = self._socket.recv(38768).decode()
+            return resp
         except:
             print("response timed out")
 
@@ -181,7 +182,6 @@ class CellCycler():
         """accepts a list of channel codes in the form string "580206" and prints a list of their working states
         returns true only once all of the channels match the desired state"""
         states = self.get_working_states(chlcodes).values()
-        #print(states)
         state_matches = (state == desired_state for state in states)
         return all(state_matches)
     
@@ -199,7 +199,6 @@ class CellCycler():
         """accepts a list of channel codes in the form string "580206" and prints a list of their step types
         returns true only once all of the channels match the desired step"""
         steps = self.get_step_types(chlcodes)
-        print(steps)
         step_matches = (step == desired_step for step in steps)
         return all(step_matches)
     
