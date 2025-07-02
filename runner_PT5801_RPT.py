@@ -30,9 +30,10 @@ print(f'All specimens in banks {active_banks}: {specimens}')
 specimens_to_skip = input("Enter the specimens to skip, separated by commas, or press enter to skip no specimens: ")
 if specimens_to_skip:
     specimens_to_skip = [specimen.strip() for specimen in specimens_to_skip.split(',')]
+    channels_to_skip = [channels[specimens.index(specimen)] for specimen in specimens_to_skip if specimen in specimens]
     print(f'specimens to skip: {specimens_to_skip}')
     specimens = [specimen for specimen in specimens if specimen not in specimens_to_skip]
-
+    channels = [channel for channel in channels if channel not in channels_to_skip]
 cycle_manager = CycleManager()
 print('\nSpecimen cycle counts from cycle tracker json file:')
 print('Specimen ID:\tlast cycle number\tlast cycle direction')

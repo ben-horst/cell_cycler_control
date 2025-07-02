@@ -34,12 +34,12 @@ class MatExtractor:
         #grab the specimen ids and barcodes
         specimen_ids = mat_contents.get('test_conditions').flatten()
         specimen_ids = [specimen_id.replace('xx', '') for specimen_id in specimen_ids]  #get rid of leading 'xx' on some specimen ids
-        barcodes = mat_contents.get('barcodes').flatten()
+        #barcodes = mat_contents.get('barcodes').flatten()
 
         #build dataframe and add specimen_id and barcodes
         data = pd.DataFrame(vals, columns=column_names)
         data.insert(0, 'specimen_id', specimen_ids)
-        data.insert(1, 'barcode', barcodes)
+        #data.insert(1, 'barcode', barcodes)
 
         return data
 
