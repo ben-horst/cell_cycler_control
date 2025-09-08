@@ -119,6 +119,51 @@ def build_new_profiles(params_dict, base_file_path, output_file_path):
             
         print(f"{spec_id}\t\t{params['cutoff_current']:.2f} A\t\t{params['cell_capacity']:.2f} Ah\t\t{int(dchg_times['EX'])} s\t\t{int(dchg_times['ST'])} s")
 
+def build_new_OCV_profiles(params_dict, base_file_path, output_file_path):
+    # Create a new folder with today's date within output_file_path
+    today_date = datetime.now().strftime("%Y-%m-%d")
+    dated_output_path = os.path.join(output_file_path, today_date)
+    os.makedirs(dated_output_path, exist_ok=True)
+
+    print(f"Creating new OCV profiles in {dated_output_path}")
+    print("Spec ID\t\tCell Capacity")
+
+    for spec_id, params in params_dict.items():
+        cell_cap = params['cell_capacity']   #Ah
+
+        #edit charge profile for each specimen
+        base_ocv_chg_profile = CONFIG.OCV_CHARGE_PROFILE
+        ocv_chg_profile_path = f"{base_file_path}/{base_ocv_chg_profile}"
+        new_ocv_chg_profile_path = f"{dated_output_path}/{spec_id}_OCV_CHG.xml"
+        #calculate the capacities for each SOC step
+        ocv_chg_params = {}
+        ocv_chg_vals = {}
+        for step, soc_step in CONFIG.OCV_CHARGE_STEPS.items():
+            hndl = f'{step}_cap'
+            ocv_chg_params[hndl] = [step, 'Cap']
+            ocv_chg_vals[hndl] = cell_cap * soc_step / 100
+        shutil.copy(ocv_chg_profile_path, new_ocv_chg_profile_path)   #copy the base file to the new directory
+        dc_editor = ProfileEditor(new_ocv_chg_profile_path)  #open the new file and edit the parameters
+        dc_editor.update_test_profile_params(ocv_chg_params, ocv_chg_vals)
+
+        #edit discharge profile for each specimen
+        base_ocv_dchg_profile = CONFIG.OCV_DISCHARGE_PROFILE
+        ocv_dchg_profile_path = f"{base_file_path}/{base_ocv_dchg_profile}"
+        new_ocv_dchg_profile_path = f"{dated_output_path}/{spec_id}_OCV_DCHG.xml"
+        #calculate the capacities for each SOC step
+        ocv_dchg_params = {}
+        ocv_dchg_vals = {}
+        for step, soc_step in CONFIG.OCV_DISCHARGE_STEPS.items():
+            hndl = f'{step}_cap'
+            ocv_dchg_params[hndl] = [step, 'Cap']
+            ocv_dchg_vals[hndl] = cell_cap * soc_step / 100
+        shutil.copy(ocv_dchg_profile_path, new_ocv_dchg_profile_path)   #copy the base file to the new directory
+        dc_editor = ProfileEditor(new_ocv_dchg_profile_path)  #open the new file and edit the parameters
+        dc_editor.update_test_profile_params(ocv_dchg_params, ocv_dchg_vals)
+
+        print(f"{spec_id}\t\t{params['cell_capacity']:.2f} Ah")
+
+
 root = tk.Tk()
 root.withdraw()  # Hide the root window
 mat_file = filedialog.askopenfilename(
@@ -128,10 +173,19 @@ mat_file = filedialog.askopenfilename(
 if not mat_file:
     raise ValueError("No .mat file selected")
 
-base_file_path = "G:/My Drive/Cell Test Profiles/Cycles/PT5801_base_profiles"
-output_file_path = "G:/My Drive/Cell Test Profiles/Cycles/PT5801_tuned_profiles"
+
 
 mat_extractor = MatExtractor(mat_file)
-
 new_params = mat_extractor.build_params_dict()
-build_new_profiles(new_params, base_file_path, output_file_path)
+
+type = input('Input either CYC or OCV to generate cycle profiles or OCV extraction profiles: ')
+if type == 'CYC':
+    base_file_path = "G:/My Drive/Cell Test Profiles/Cycles/PT5801_base_profiles"
+    output_file_path = "G:/My Drive/Cell Test Profiles/Cycles/PT5801_tuned_profiles"
+    build_new_profiles(new_params, base_file_path, output_file_path)
+elif type == 'OCV':
+    base_file_path = "G:/My Drive/Cell Test Profiles/RPTs"
+    output_file_path = "G:/My Drive/Cell Test Profiles/RPTs/PT5801_tuned_OCV_profiles"
+    build_new_OCV_profiles(new_params, base_file_path, output_file_path)
+else:
+    raise ValueError('must enter CYC or OCV')

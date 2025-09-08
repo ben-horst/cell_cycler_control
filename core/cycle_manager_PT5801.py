@@ -54,8 +54,8 @@ class CycleManager:
 
     def update_cycle_tracker(self, specimen_id, direction, increment=False):
         #updates the cycle tracker json file with the last cycle completed for the specified specimen and direction (charge/discharge)
-        if direction not in ['CHG', 'DCHG', 'RPT', 'CQT', 'STRG']:
-            raise ValueError(f"Invalid direction '{direction}'. Must be 'CHG', 'DCHG', 'RPT', 'CQT', 'STRG'.")
+        if direction not in ['CHG', 'DCHG', 'RPT', 'CQT', 'STRG', 'OCV_CHG', 'OCV_DCHG']:
+            raise ValueError(f"Invalid direction '{direction}'. Must be 'CHG', 'DCHG', 'RPT', 'CQT', 'STRG', 'OCV_CHG', 'OCV_DCHG'.")
         
         with open(self.cycle_tracker_file, 'r') as f:
             cycle_tracker = json.load(f)
