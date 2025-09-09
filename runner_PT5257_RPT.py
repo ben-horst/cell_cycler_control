@@ -28,8 +28,7 @@ cqt_savepath = "G:/My Drive/Cell Test Data/PT5257/CQTs"
 cqt_temp = 25
 
 all_channels = [580201, 580202, 580203, 580204, 580205, 580206, 580207, 580208]
-#temps = [20, 35, 50]
-temps = [35, 50]
+temps = [20, 35, 50]
 
 test_runner = TestRunner(all_channels, test_title)
 barcodes = test_runner.barcodes
@@ -59,27 +58,27 @@ for channel, data in specimens.items():
 
 input('\nPress enter to start connection quality test (CQT)')
 
-# perform connection quality check
-# print('Setting temperature for cell connection quality test...')
-# test_runner.bring_all_cells_to_temp_and_block_until_complete(temp=cqt_temp, timeout_mins=30, verbose=False)
-# print('Charging cells before CQT.')
-# test_runner.start_tests(all_channels, prchg_profile, cqt_savepath, 'PRCHG', verbose=False)
-# test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=60, verbose=False) 
-# print('Starting CQTs.')
-# for channel, data in specimens.items():
-#     barcode = data['barcode']
-#     storage_temp = data['storage_temp']
-#     storage_soc = data['storage_soc']
-#     is_P30B = data['is_P30B']
-#     if is_P30B:
-#         cqt_name = f'{testname_base_P30}_CQT_stored_at_{storage_soc}soc_{storage_temp}degC'
-#         test_runner.start_tests([channel], cqt_profile_P30, cqt_savepath, cqt_name, verbose=False)
-#     else:
-#         cqt_name = f'{testname_base_P45}_CQT_stored_at_{storage_soc}soc_{storage_temp}degC'
-#         test_runner.start_tests([channel], cqt_profile_P45, cqt_savepath, cqt_name, verbose=False)
+#perform connection quality check
+print('Setting temperature for cell connection quality test...')
+test_runner.bring_all_cells_to_temp_and_block_until_complete(temp=cqt_temp, timeout_mins=30, verbose=False)
+print('Charging cells before CQT.')
+test_runner.start_tests(all_channels, prchg_profile, cqt_savepath, 'PRCHG', verbose=False)
+test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=60, verbose=False) 
+print('Starting CQTs.')
+for channel, data in specimens.items():
+    barcode = data['barcode']
+    storage_temp = data['storage_temp']
+    storage_soc = data['storage_soc']
+    is_P30B = data['is_P30B']
+    if is_P30B:
+        cqt_name = f'{testname_base_P30}_CQT_stored_at_{storage_soc}soc_{storage_temp}degC'
+        test_runner.start_tests([channel], cqt_profile_P30, cqt_savepath, cqt_name, verbose=False)
+    else:
+        cqt_name = f'{testname_base_P45}_CQT_stored_at_{storage_soc}soc_{storage_temp}degC'
+        test_runner.start_tests([channel], cqt_profile_P45, cqt_savepath, cqt_name, verbose=False)
 
-# print('Waiting for CQTs to finish...')
-# test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=4, verbose=False)  
+print('Waiting for CQTs to finish...')
+test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=4, verbose=False)  
 #the above only passes if all cells reach the "finish" state within the timeout, otherwise the program rasies exception and exits
 
 print('\nCQT successful!\n')
