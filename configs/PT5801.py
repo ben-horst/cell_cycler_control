@@ -115,3 +115,25 @@ DISCHARGE_PROFILES =  {
 P45B_NOM_WH = 16.2  #nominal energy in Wh for P45B cells
 P45B_NOM_AH = 4.5  #nominal capacity in Ah for P45B cells
 P45B_NOM_V = P45B_NOM_WH / P45B_NOM_AH  #nominal voltage in V for P45B cells
+
+#specs for OCV extraction profiles
+OCV_CHARGE_PROFILE = 'P45_OCV_V1.0_chg.xml'
+OCV_DISCHARGE_PROFILE = 'P45_OCV_V1.0_dchg.xml'
+OCV_CHARGE_STEPS = {    #dist in the format: step#: SOC, where SOC is the % charged/discharged in that step
+    'Step4': 100,     #discharge from 100% to 0%
+    'Step6': 3,       #0-3%, 3-6%
+    'Step9': 4,       #6-10%
+    'Step11': 5,      #15:5:30%
+    'Step14': 5,      #35:5:90%
+    'Step17': 3,      #90-93%, 93-96%
+    'Step20': 4       #96-100%
+}
+OCV_DISCHARGE_STEPS = {    #dist in the format: step#: SOC, where SOC is the % charged/discharged in that step
+    'Step4': 4,       #96-100%
+    'Step6': 3,       #90-93%, 93-96%
+    'Step9': 5,       #35:5:90%
+    'Step12': 5,      #15:5:30%
+    'Step15': 5,      #15-10%
+    'Step17': 4,      #6-10%
+    'Step19': 3       #0-3%, 3-6
+}
