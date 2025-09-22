@@ -13,7 +13,7 @@ cqt_profile = "G:/My Drive/Cell Test Profiles/Utilities/CQT_P45B_1C_4C.xml"
 cqt_savepath = "G:/My Drive/Cell Test Data/PT5801/CQTs"
 cqt_temp = 25
 
-ack = input('This will perform ODV extraction. Confirm that prior to running this test, profile_editor_PT5801.py was run to generate new OCV profiles. Type YES to acknowledge.')
+ack = input('This will perform OCV extraction. Confirm that prior to running this test, profile_editor_PT5801.py was run to generate new OCV profiles. Type YES to acknowledge:  ')
 if ack != 'YES':
     raise ValueError('Please run profile editor and try again.')
 
@@ -52,8 +52,6 @@ cycle_manager = CycleManager()
 print('\nSpecimen cycle counts from cycle tracker json file:')
 print('Specimen ID:\tlast cycle number\tlast cycle direction')
 
-charge_filenames = []
-discharge_filenames = []
 cqt_filenames = []
 for specimen in specimens:
     #lookup cycle number for each specimen
@@ -96,7 +94,9 @@ print('Specimen ID:\tChannel ID\tCycle\tStart Result')
 #start discharge direction OCV extractor
 for specimen in specimens:
     cycle, direction = cycle_manager.get_last_cycle(specimen)
-    channel = CONFIG.CHANNELS_PER_BANK[bank_request][specimens.index(specimen)]  #finds the channel for the specimen
+    for bank in active_banks:
+        if specimen in CONFIG.SPECIMENS_PER_BANK[bank]:
+            channel = CONFIG.CHANNELS_PER_BANK[bank][CONFIG.SPECIMENS_PER_BANK[bank].index(specimen)]  #finds the channel for the specimen
     discharge_profile = f'{specimen}_OCV_DCHG.xml'
     discharge_profile_path = f'{profile_folder}/{discharge_profile}'       #builds the path to the discharge profile
     discharge_filename = f'{specimen}_OCV_DCHG_after_cycle_{cycle}'
@@ -115,7 +115,9 @@ print('Specimen ID:\tChannel ID\tCycle\tStart Result')
 #start charge direction OCV extractor
 for specimen in specimens:
     cycle, direction = cycle_manager.get_last_cycle(specimen)
-    channel = CONFIG.CHANNELS_PER_BANK[bank_request][specimens.index(specimen)]  #finds the channel for the specimen
+    for bank in active_banks:
+        if specimen in CONFIG.SPECIMENS_PER_BANK[bank]:
+            channel = CONFIG.CHANNELS_PER_BANK[bank][CONFIG.SPECIMENS_PER_BANK[bank].index(specimen)]  #finds the channel for the specimen
     charge_profile = f'{specimen}_OCV_CHG.xml'
     charge_profile_path = f'{profile_folder}/{charge_profile}'       #builds the path to the discharge profile
     charge_filename = f'{specimen}_OCV_CHG_after_cycle_{cycle}'
@@ -132,7 +134,9 @@ print('---------------------------------------------------------------')
 summary_table = 'Specimen\tBarcode\t\tChannel\t\tLast Cycle\tLast Event\n'
 for specimen in specimens:
     last_cycle, last_event = cycle_manager.get_last_cycle(specimen)       #checks to see the last cycle
-    chan = CONFIG.CHANNELS_PER_BANK[bank_request][specimens.index(specimen)]  #finds the channel for the specimen
+    for bank in active_banks:
+        if specimen in CONFIG.SPECIMENS_PER_BANK[bank]:
+            chan = CONFIG.CHANNELS_PER_BANK[bank][CONFIG.SPECIMENS_PER_BANK[bank].index(specimen)]  #finds the channel for the specimen
     barcode = barcodes[specimens.index(specimen)]
     summary_table += f'{specimen}\t\t{barcode}\t{chan}\t\t{last_cycle}\t\t{last_event}\n'
 

@@ -17,7 +17,7 @@ CHANNELS_PER_BANK = {   #active channel numbers for each bank
     5201: [520101, 520102, 520103, 520104, 520105, 520107],
     5202: [520201, 520202, 520203, 520204, 520205, 520206],
     5801: [580101, 580102, 580103, 580104],
-    5901: [590101, 590103, 590104, 590105, 590106, 590107, 590108]
+    5901: [590101, 590103, 590104, 590105, 590106, 590108] #  Skipped T6C2R1
 }
 
 SPECIMENS_PER_BANK = {  #specimen IDs for each bank
@@ -26,7 +26,7 @@ SPECIMENS_PER_BANK = {  #specimen IDs for each bank
     5201: ['T7C1R1', 'T7C1R2', 'T7C2R1', 'T7C2R2', 'T7C3R1', 'T8C1R1'],
     5202: ['T2C3R1', 'T2C3R2', 'T4C1R1', 'T4C1R2', 'T4C2R1', 'T4C2R2'],
     5801: ['T1C2R1', 'T1C2R2', 'T2C2R1', 'T2C2R2'],
-    5901: ['T5C1R1', 'T5C2R1', 'T5C2R2', 'T6C1R1', 'T6C1R2', 'T6C2R1', 'T6C2R2']
+    5901: ['T5C1R1', 'T5C2R1', 'T5C2R2', 'T6C1R1', 'T6C1R2', 'T6C2R2'] #  Skipped T6C2R1
 }
 
 BASE_CHARGE_PROFILES = {  # map of base profiles to use for each pair of specimens - FC = fast charge, SC = slow charge
