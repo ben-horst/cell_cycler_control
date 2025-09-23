@@ -8,18 +8,20 @@ base_file_path = os.path.join(base_file_folder, base_file_name)
 print(f'This will build an RPT profile based on {base_file_name}')
 
 name = input('Enter cell name: ')
-cap = input('Enter cell capacity, in Ah: ')
-max_V = input('Enter cell max voltage: ')
-min_V = input('Enter cell min voltage: ')
+cap = float(input('Enter cell capacity, in Ah: '))
+max_V = float(input('Enter cell max voltage: '))
+min_V = float(input('Enter cell min voltage: '))
 
 pulse_C_rate_low = 1
 pulse_C_rate_high = 8
 
-new_file_name = f'{name}_RPT'
+new_file_name = f'{name}_RPT.xml'
 new_file_path = os.path.join(base_file_folder, new_file_name)
 
 print(f'New RPT for {new_file_name} will be generated in {base_file_folder}')
-input('Press "y" to continue: ')
+resp = input('Press "y" to continue: ')
+if resp != 'y':
+    exit()
 
 params_to_change = {
     'Step2_curr': ['Step2', 'Curr'],
