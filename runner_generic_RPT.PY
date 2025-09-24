@@ -14,9 +14,9 @@ root.withdraw()
 root.attributes('-topmost', True)  # Bring dialog to front
 
 # ask for creating test title and Results folder
-test_title = input("Enter test title (e.g., PB45_PRT):")
+test_title = input("Enter a cell name (e.g., PB45):")
 if not test_title:
-    print("Error: test title cannot be empty.")
+    print("Error: cell name cannot be empty.")
     sys.exit(1)
 test_title = test_title.strip().replace(" ", "_")
 base_path = "G:/My Drive/Cell Test Data"
@@ -24,7 +24,7 @@ save_path = os.path.join(base_path, test_title)
 cqt_savepath = save_path
 
 # ask for a cqt-profile
-cqt_profile_dir = r"G:/My Drive/Cell Test Profiles/cqt"
+cqt_profile_dir = r"G:/My Drive/Cell Test Profiles/Utilities"
 cqr_file_name = f"{test_title}_QCT"
 if os.path.exists(cqt_profile_dir):
     init_dir = cqt_profile_dir
