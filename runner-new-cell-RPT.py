@@ -86,7 +86,7 @@ for ch in channels:
         sys.exit(1)
 
 for ch in channels:
-    print(f" - {ch} ({valid_channels[ch]})")
+    print(f" - {ch} (valid)")
 
 temps = [20, 35, 50]
 cqt_temp = 25
