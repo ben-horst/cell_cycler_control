@@ -27,13 +27,13 @@ params_to_change = {
     'Step2_curr': ['Step2', 'Curr'],
     'Step2_CO_volt': ['Step2', 'Stop_Volt'],
     'Step3_curr': ['Step3', 'Curr'],
-    'Step3_volt': ['Step3', 'Volt'],
+    'Step3_CO_volt': ['Step3', 'Stop_Volt'],
 }
 new_vals = {
     'Step2_curr': cap * pulse_1C_rate,
     'Step2_CO_volt': max_V,
     'Step3_curr': cap * pulse_4C_rate,
-    'Step3_volt': min_V,
+    'Step3_CO_volt': min_V,
     }
 
 shutil.copy(base_file_path, new_file_path)   #copy the base file to the new directory

@@ -11,6 +11,7 @@ from core.cycle_manager_PT5801 import CycleManager
 # Force Tk window to stay hidden
 root = tk.Tk()
 root.withdraw()
+root.attributes('-topmost', True)  # Bring dialog to front
 
 # ask for creating test title and Results folder
 test_title = input("Enter test title (e.g., PB45_PRT):")
@@ -54,6 +55,7 @@ RPT_profile = filedialog.askopenfilename(
     initialdir=init_dir,
     filetypes=[("XML files", "*.xml")]
 )
+root.destroy()
 # Check if a profile was selected
 if not RPT_profile:
     print("Error: No profile file selected. Exiting...")
