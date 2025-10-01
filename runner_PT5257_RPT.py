@@ -28,6 +28,7 @@ cqt_savepath = "G:/My Drive/Cell Test Data/PT5257/CQTs"
 cqt_temp = 25
 
 all_channels = [580201, 580202, 580203, 580204, 580205, 580206, 580207, 580208]
+updated_channels = []
 temps = [20, 35, 50]
 
 test_runner = TestRunner(all_channels, test_title)
@@ -43,7 +44,7 @@ for channel, barcode in zip(all_channels, barcodes):
         is_P30B = False
     else:
         raise ValueError(f'Barcode {barcode} does not start with P30B or P45B')
-    
+    updated_channels.append(channel)
     storage_temp = CONFIG.SPECIMENS[barcode]['temp']
     storage_soc = CONFIG.SPECIMENS[barcode]['soc']
     specimens[channel] = {'barcode': barcode, 'storage_temp': storage_temp, 'storage_soc': storage_soc, 'is_P30B': is_P30B}
@@ -66,7 +67,7 @@ input('\nPress enter to start connection quality test (CQT)')
 print('Setting temperature for cell connection quality test...')
 test_runner.bring_all_cells_to_temp_and_block_until_complete(temp=cqt_temp, timeout_mins=30, verbose=False)
 print('Charging cells before CQT.')
-test_runner.start_tests(all_channels, prchg_profile, cqt_savepath, 'PRCHG', verbose=False)
+test_runner.start_tests(updated_channels, prchg_profile, cqt_savepath, 'PRCHG', verbose=False)
 test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=60, verbose=False) 
 print('Starting CQTs.')
 for channel, data in specimens.items():
