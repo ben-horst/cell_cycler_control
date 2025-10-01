@@ -34,12 +34,16 @@ test_runner = TestRunner(all_channels, test_title)
 barcodes = test_runner.barcodes
 specimens = {}
 for channel, barcode in zip(all_channels, barcodes):
-    if barcode.startswith('P30B'):
+    if barcode == "--EMPTY--":
+        print(f"Removing channel {channel} because barcode is EMPTY")
+        continue  # skip this one
+    elif barcode.startswith('P30B'):
         is_P30B = True
     elif barcode.startswith('P45B'):
         is_P30B = False
     else:
         raise ValueError(f'Barcode {barcode} does not start with P30B or P45B')
+    
     storage_temp = CONFIG.SPECIMENS[barcode]['temp']
     storage_soc = CONFIG.SPECIMENS[barcode]['soc']
     specimens[channel] = {'barcode': barcode, 'storage_temp': storage_temp, 'storage_soc': storage_soc, 'is_P30B': is_P30B}
