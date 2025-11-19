@@ -13,12 +13,12 @@ DISCHARGE_TEMP = 40
 
 CHANNELS_PER_BANK = {   #active channel numbers for each bank
     5801: [580105, 580106],
-    5902: [590201, 590202, 590203, 590204, 590205, 590206, 590207, 590208, 590209, 590210]
+    5902: [590201, 590202, 590203, 590204, 590205, 590206, 590207, 590208]
 }
 
 SPECIMENS_PER_BANK = {  # specimen IDs for each bank (placeholder IDs; update later)
     5801: ['SPEC_5801_A', 'SPEC_5801_B'],
-    5902: ['SPEC_5902_1', 'SPEC_5902_2', 'SPEC_5902_3', 'SPEC_5902_4', 'SPEC_5902_5', 'SPEC_5902_6', 'SPEC_5902_7', 'SPEC_5902_8', 'SPEC_5902_9', 'SPEC_5902_10']
+    5902: ['SPEC_5902_1', 'SPEC_5902_2', 'SPEC_5902_3', 'SPEC_5902_4', 'SPEC_5902_5', 'SPEC_5902_6', 'SPEC_5902_7', 'SPEC_5902_8']
 }
 
 BASE_CHARGE_PROFILES = {  # map of base profiles to use for each pair of specimens - FC = fast charge, SC = slow charge
