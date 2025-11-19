@@ -7,7 +7,7 @@ from core.gmail import Gmail
 import time
 
 class TestRunner:
-    def __init__(self, all_channels, test_title, email_addresses='ben.horst@flyzipline.com,erneste.niyigena@flyzipline.com'):
+    def __init__(self, all_channels, test_title, email_addresses='ben.horst@flyzipline.com,erneste.niyigena@flyzipline.com', interactive=True):
         self.all_channels = all_channels
         self.test_title = test_title
         self.banks = self.find_banks_used()
@@ -18,7 +18,8 @@ class TestRunner:
         self.email = Gmail()
         self.email_addresses = email_addresses
         self.barcodes = self.barcode_manager.barcodes_from_chlcodes(self.all_channels)
-        input(f"This test runner will run {test_title} on {len(self.all_channels)} cells in banks {self.banks}.\nThe barcodes are {self.barcodes}.\nPress enter to continue: ")
+        if interactive:
+            input(f"This test runner will run {test_title} on {len(self.all_channels)} cells in banks {self.banks}.\nThe barcodes are {self.barcodes}.\nPress enter to continue: ")
 
     def find_banks_used(self):
         banks = []

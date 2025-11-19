@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Run Logs</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 20px; color: #111; }
+    h1 { font-size: 20px; }
+    .status { margin-bottom: 10px; font-weight: 600; }
+    pre { background: #f7f7f7; padding: 12px; border-radius: 8px; max-height: 70vh; overflow: auto; }
+    a { color: #0d6efd; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <a href="/">← New Run</a>
+  <h1>Job {{ job_id }}</h1>
+  <div class="status">Status: {{ status }}</div>
+  <pre>{{ logs }}</pre>
+
+  {% if middle_server_events %}
+    <h1>Middle Server Events</h1>
+    <pre>{{ middle_server_events }}</pre>
+  {% endif %}
+</body>
+</html>
+
+

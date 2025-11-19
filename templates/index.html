@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PT7526 RPT Runner</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 20px; color: #111; }
+    h1 { font-size: 20px; }
+    form { max-width: 560px; padding: 16px; border: 1px solid #ddd; border-radius: 8px; }
+    label { display:block; margin-top: 12px; font-weight: 600; }
+    input, select, textarea { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ccc; border-radius: 6px; }
+    button { margin-top: 16px; padding: 10px 14px; border: 0; border-radius: 6px; background: #0d6efd; color: white; cursor: pointer; }
+    button:hover { background: #0b5ed7; }
+    .hint { color: #555; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <p>
+    <a href="/logs/{{ active_job_id or 'nono' }}"><button type="button">View Current Job</button></a>
+  </p>
+
+  <h1 style="margin-top:28px;">Run PT7526 RPT</h1>
+  <label for="banks">Banks</label>
+  <input id="banks" placeholder="ALL or comma-separated (e.g. 2701, 5801)">
+  <div class="hint">Enter ALL to use all available banks, or a comma-separated list.</div>
+
+  <label for="specimens_to_skip_7526">Specimens to skip (comma separated)</label>
+  <input id="specimens_to_skip_7526" placeholder="e.g. A1B2C3">
+
+  <button id="startBtn" type="button">Start Test</button>
+  <button id="pollBtn" type="button" style="margin-left:8px;">Monitor Middle Server</button>
+
+  <h1 style="margin-top:22px;">Logs</h1>
+  <pre id="logsBox"></pre>
+
+  <h1 style="margin-top:22px;">Middle Server Events</h1>
+  <pre id="msBox"></pre>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
+
+
