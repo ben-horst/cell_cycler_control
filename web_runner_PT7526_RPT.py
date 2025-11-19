@@ -1,5 +1,5 @@
 import os
-from typing import List, Iterable, Tuple, Dict, Any, Optional
+from typing import List, Iterable, Tuple, Dict, Any, Optional, Callable
 
 import configs.PT7526 as CONFIG
 from core.test_runner import TestRunner
@@ -63,6 +63,7 @@ def run_rpt(
     rpt_timeout_mins: int = 60 * 48,
     test_title: str = "PT7526_RPTs",
     verbose: bool = True,
+    log_callback: Optional[Callable[[str], None]] = None,
 ) -> Dict[str, Any]:
     """
     Execute the PT-7526 RPT sequence across selected banks.
@@ -81,6 +82,14 @@ def run_rpt(
     Returns:
         Summary dictionary of the run.
     """
+    # Logger
+    def log(msg: str):
+        try:
+            (log_callback or print)(msg)
+        except Exception:
+            # Always keep running even if callback fails
+            print(msg)
+
     # Paths
     profile = "G:/My Drive/Cell Test Profiles/RPTs/H52_RPT_V1.2.xml"
     savepath = "G:/My Drive/Cell Test Data/PT7526/RPTs"
@@ -94,7 +103,7 @@ def run_rpt(
     active_banks = _parse_banks(banks_input)
     pairs = _build_pairs(active_banks)
     if verbose:
-        print(f"All specimens in banks {active_banks}: {[sp for _, sp in pairs]}")
+        log(f"All specimens in banks {active_banks}: {[sp for _, sp in pairs]}")
 
     pairs = _filter_pairs_by_skip(pairs, specimens_to_skip_csv)
     if not pairs:
@@ -105,13 +114,13 @@ def run_rpt(
     cycle_manager = CycleManager()
 
     # Filenames use cycle count
-    print("\nSpecimen cycle counts from cycle tracker json file:")
-    print("Specimen ID:\tlast cycle number\tlast cycle direction")
+    log("\nSpecimen cycle counts from cycle tracker json file:")
+    log("Specimen ID:\tlast cycle number\tlast cycle direction")
     filenames = []
     for specimen in specimens:
         cycle, direction = cycle_manager.get_last_cycle(specimen)
         filenames.append(f"{specimen}_RPT_after_{cycle}_cycles")
-        print(f"{specimen}\t\t\t{cycle}\t\t\t{direction}")
+        log(f"{specimen}\t\t\t{cycle}\t\t\t{direction}")
 
     # Validate profiles exist (fail fast)
     _ensure_profiles_exist([profile, cqt_profile])
@@ -121,7 +130,7 @@ def run_rpt(
     barcodes = test_runner.barcodes
 
     # CQT
-    print("Setting temperature for cell connection quality test...")
+    log("Setting temperature for cell connection quality test...")
     test_runner.bring_all_cells_to_temp_and_block_until_complete(temp=cqt_temp, timeout_mins=cqt_timeout_mins, verbose=verbose)
     test_runner.start_tests(channels, cqt_profile, cqt_savepath, filenames, verbose=verbose)
     test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=4, verbose=verbose)

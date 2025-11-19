@@ -12,23 +12,23 @@ async function startTest() {
     return;
   }
   console.log('Starting test with:', { banks, specimens_to_skip });
-  logsBox.textContent = 'Running... this may take a while.\n';
-  try {
-    const resp = await fetch('/api/run_7526_rpt', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ banks, specimens_to_skip })
-    });
-    const data = await resp.json();
-    console.log('Run response:', data);
-    logsBox.textContent = data.logs || '';
-    if (data.status !== 'done') {
-      logsBox.textContent += '\nStatus: ' + data.status;
-    }
-  } catch (e) {
-    console.error('Run error:', e);
-    logsBox.textContent += '\n[ERROR] ' + (e && e.message ? e.message : String(e));
-  }
+  logsBox.textContent = 'Running (streaming)... this may take a while.\n';
+  // Use SSE for streaming logs
+  const url = `/api/run_7526_rpt_stream?banks=${encodeURIComponent(banks)}&specimens_to_skip=${encodeURIComponent(specimens_to_skip)}`;
+  const es = new EventSource(url);
+  es.onmessage = (e) => {
+    console.log('SSE:', e.data);
+    logsBox.textContent += e.data + '\n';
+    logsBox.scrollTop = logsBox.scrollHeight;
+  };
+  es.addEventListener('done', () => {
+    console.log('SSE done');
+    es.close();
+  });
+  es.onerror = (e) => {
+    console.error('SSE error', e);
+    es.close();
+  };
 }
 
 let pollTimer = null;

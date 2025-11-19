@@ -3,12 +3,14 @@ import threading
 import atexit
 from contextlib import redirect_stdout, redirect_stderr
 
-from flask import Flask, request, redirect, url_for, render_template, jsonify
+from flask import Flask, request, redirect, url_for, render_template, jsonify, Response, stream_with_context
 
 import configs.PT5801 as CONFIG
 from web_runner_PT5801 import run_cycles
 from web_runner_PT7526_RPT import run_rpt
 from core import cycler_middle_server
+import queue
+import threading
 
 
 app = Flask(__name__)
@@ -103,6 +105,64 @@ def api_middle_server_events():
         events = []
     # Return last 200 for brevity
     return jsonify({"events": events[-200:]})
+
+
+@app.get("/api/run_7526_rpt_stream")
+def api_run_7526_rpt_stream():
+    banks_text = (request.args.get("banks", "") or "").strip()
+    if not banks_text:
+        return Response("Missing banks\n", status=400, mimetype="text/plain")
+    skip_csv = (request.args.get("specimens_to_skip", "") or "").strip()
+
+    log_queue: "queue.Queue[str | None]" = queue.Queue()
+
+    class Writer(io.TextIOBase):
+        def write(self, s):
+            if not s:
+                return 0
+            # Split to lines so SSE displays cleanly
+            for line in s.splitlines():
+                if line.strip() == "":
+                    continue
+                try:
+                    log_queue.put(line, timeout=1)
+                except Exception:
+                    pass
+            return len(s)
+        def flush(self):
+            return
+
+    def runner():
+        try:
+            with redirect_stdout(Writer()), redirect_stderr(Writer()):
+                # Also pass a callback; prints will be captured anyway
+                run_rpt(banks_input=banks_text, specimens_to_skip_csv=skip_csv, log_callback=lambda m: print(m))
+        except Exception as e:
+            try:
+                log_queue.put(f"[ERROR] {repr(e)}", timeout=1)
+            except Exception:
+                pass
+        finally:
+            try:
+                log_queue.put(None, timeout=1)
+            except Exception:
+                pass
+
+    threading.Thread(target=runner, daemon=True).start()
+
+    @stream_with_context
+    def event_stream():
+        # Initial notice
+        yield "data: starting\n\n"
+        while True:
+            item = log_queue.get()
+            if item is None:
+                yield "event: done\ndata: done\n\n"
+                break
+            # SSE escape: basic line
+            yield f"data: {item}\n\n"
+
+    return Response(event_stream(), mimetype="text/event-stream")
 
 
 if __name__ == "__main__":
