@@ -12,7 +12,7 @@ cqt_profile = "G:/My Drive/Cell Test Profiles/Utilities/CQT_H52_1C_4C.xml"
 cqt_savepath = "G:/My Drive/Cell Test Data/PT7526/CQTs"
 cqt_temp = 25
 
-bank_request = input("Enter the banks for RPT execution, separated by commas, or enter 'ALL' to use all 6 banks: ")
+bank_request = input(f"Enter the banks for RPT execution, separated by commas, or enter 'ALL' to use all {len(CONFIG.AVAILABLE_BANKS)} banks ({', '.join(str(b) for b in CONFIG.AVAILABLE_BANKS)}): ")
 if bank_request == 'ALL':
     active_banks = CONFIG.AVAILABLE_BANKS
 else:
