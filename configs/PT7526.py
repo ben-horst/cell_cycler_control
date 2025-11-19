@@ -13,7 +13,7 @@ DISCHARGE_TEMP = 40
 
 CHANNELS_PER_BANK = {   #active channel numbers for each bank
     5801: [580105, 580106],
-    5902: [590201, 590203, 590204, 590205, 590206, 590208] #  Skipped 590207 
+    5902: [590201, 590202, 590203, 590204, 590205, 590206,590207, 590208] #  Skipped 590207 
 }
 
 SPECIMENS_PER_BANK = {  # specimen IDs for each bank (placeholder IDs; update later)
