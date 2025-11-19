@@ -17,5 +17,5 @@ print(chiller.read_temperature())
 5801 - COM11
 5802 - COM10
 5901 - COM15
-5902 - COM
+5902 - COM16
 """
