@@ -1,7 +1,7 @@
 from core.temperature_control import TemperatureController
 
 class ChillerController():
-    def __init__(self, banks, comports={2701:"COM13", 2702:"COM9", 5201:"COM14", 5202:"COM12", 5801:"COM11", 5802:"COM10", 5901:"COM15", 5902:"COM"}):
+    def __init__(self, banks, comports={2701:"COM13", 2702:"COM9", 5201:"COM14", 5202:"COM12", 5801:"COM11", 5802:"COM10", 5901:"COM15", 5902:"COM16"}):
         #initialize with list of banks that should be controlled
         self.chillers = {}  #dictionary containing objects for the chillers
         for bank in banks:
