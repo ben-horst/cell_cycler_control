@@ -57,6 +57,12 @@ input('Press enter to continue with test execution.')
 test_runner = TestRunner(channels, test_title)
 barcodes = test_runner.barcodes
 
+# print a clear, aligned mapping so barcodes visibly match the filtered pairs
+print('\nSpecimen -> Channel -> Barcode:')
+chan_to_barcode = dict(zip(channels, barcodes))
+for ch, sp in pairs:
+    print(f'{sp}\t{ch}\t{chan_to_barcode.get(ch)}')
+
 #perform connection quality check
 print('Setting temperature for cell connection quality test...')
 test_runner.bring_all_cells_to_temp_and_block_until_complete(temp=cqt_temp, timeout_mins=30)
