@@ -85,14 +85,15 @@ class TestRunner:
                             port = self.chiller_controller.get_port(bank, group)
                             self.send_email(f'{self.test_title} Test Aborted - Chiller Comms Failure.', f'Failed to read temperature on chiller for bank {bank} group {group} on port {port}')
                             raise RuntimeError(f'failed to read temperature on bank {bank} group {group} (port {port})- aborting test')
-                        # filter channel data to this bank-group only
-                        chan_data = self.cycler.get_channels_current_data(self.bank_channels[bank])
+                        # filter channel data to this bank-group only, using channel numbers alongside their data
+                        bank_channel_numbers = self.bank_channels[bank]
+                        chan_data = self.cycler.get_channels_current_data(bank_channel_numbers)
                         cell_temps = []
-                        for chan in chan_data:
-                            local = chan % 100
+                        for channel_number, channel_data in zip(bank_channel_numbers, chan_data):
+                            local = channel_number % 100
                             belongs = (group == '1-4' and 1 <= local <= 4) or (group == '5-8' and 5 <= local <= 8)
                             if belongs:
-                                cell_temps.append(float(chan.get('auxtemp')))
+                                cell_temps.append(float(channel_data.get('auxtemp')))
                         if not cell_temps:
                             # if no channels in this group are active, consider it OK
                             temps_ok[(bank, group)] = True
