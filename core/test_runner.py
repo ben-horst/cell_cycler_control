@@ -43,57 +43,83 @@ class TestRunner:
         #this is blocking until the temperatures are achieved, but will abort if timeout (in minutes) is reached
         print(f'setting chillers and starting blocking wait for all cells to reach within {temp_tolerance} deg of {temp} degC - timeout = {timeout_mins} minutes')
         start_time = time.time()
-        temp_paddings = dict.fromkeys(self.banks, 0)
-        chiller_targets = dict.fromkeys(self.banks, temp)
-        temps_ok = dict.fromkeys(self.banks, False)
-        for bank in self.banks:
-            try:
-                self.chiller_controller.set_temp(bank, chiller_targets[bank])
-                print(f'chiller for {bank} set to {chiller_targets[bank]}degC')
-            except:
-                self.send_email(f'{self.test_title} Test Aborted - Chiller Comms Failure.', f'Failed to set temperature on chiller for bank {bank} on port {self.chiller_controller.chillers.get(bank)}')
-                raise RuntimeError(f'failed to set temperature on bank {bank} (port {self.chiller_controller.chillers.get(bank)})- aborting test')
+        # determine active groups per bank: '1-4' for channels 01-04, '5-8' for channels 05-08
+        bank_groups = {}
+        for bank, channels in self.bank_channels.items():
+            groups = set()
+            for ch in channels:
+                local = ch % 100
+                if 1 <= local <= 4:
+                    groups.add('1-4')
+                elif 5 <= local <= 8:
+                    groups.add('5-8')
+            bank_groups[bank] = sorted(list(groups))
+        # track targets and padding per (bank, group)
+        temp_paddings = {(bank, group): 0 for bank, groups in bank_groups.items() for group in groups}
+        chiller_targets = {(bank, group): temp for bank, groups in bank_groups.items() for group in groups}
+        temps_ok = {(bank, group): False for bank, groups in bank_groups.items() for group in groups}
+        # initial set for all bank-groups
+        for bank, groups in bank_groups.items():
+            for group in groups:
+                try:
+                    self.chiller_controller.set_temp(bank, chiller_targets[(bank, group)], group=group)
+                    print(f'chiller for bank {bank} group {group} set to {chiller_targets[(bank, group)]}degC')
+                except Exception as e:
+                    port = self.chiller_controller.get_port(bank, group)
+                    self.send_email(f'{self.test_title} Test Aborted - Chiller Comms Failure.', f'Failed to set temperature on chiller for bank {bank} group {group} on port {port}')
+                    raise RuntimeError(f'failed to set temperature on bank {bank} group {group} (port {port})- aborting test')
         #wait for chillers to reach temp
         while True:
             if time.time() - start_time > timeout_mins * 60:
-                self.send_email(f'{self.test_title} Test Aborted - Temperature Timeout', f'Cells failed to reach target temperature within {timeout_mins} minutes - aborting test. Bank temp_okay status: {temps_ok}')
+                self.send_email(f'{self.test_title} Test Aborted - Temperature Timeout', f'Cells failed to reach target temperature within {timeout_mins} minutes - aborting test. Bank-group temp_okay status: {temps_ok}')
                 raise RuntimeError(f'failed to reach target temperature within {timeout_mins} minutes - aborting test')
             if all(temps_ok.values()):
                 print(f'all cells reached within {temp_tolerance} deg of target temperature in {(time.time() - start_time) / 60:0.1f} mins')
                 break
             for bank in self.banks:
-                if not temps_ok[bank]:  #if the cells haven't yet reached the required temp
-                    try:
-                        chiller_temp = self.chiller_controller.read_temp(bank)
-                    except:
-                        self.send_email(f'{self.test_title} Test Aborted - Chiller Comms Failure.', f'Failed to read temperature on chiller for bank {bank} on port {self.chiller_controller.chillers.get(bank)}')
-                        raise RuntimeError(f'failed to read temperature on bank {bank} (port {self.chiller_controller.chillers.get(bank)})- aborting test')
-                    chan_data = self.cycler.get_channels_current_data(self.bank_channels[bank])
-                    cell_temps = []
-                    for chan in chan_data:
-                        cell_temps.append(float(chan.get('auxtemp')))
-                    min_cell_temp = min(cell_temps)
-                    max_cell_temp = max(cell_temps)
-                    print(f'bank {bank} -- chiller temp: {chiller_temp}  |  min cell temp: {min_cell_temp}  |  max cell temp: {max_cell_temp}') if verbose else None
-                
-                    if abs(temp - min_cell_temp) < temp_tolerance and abs(temp - max_cell_temp) < temp_tolerance:
-                        print(f'bank {bank} cell target temp reached: {min_cell_temp}degC') if verbose else None
-                        temps_ok[bank] = True
-                    elif abs(chiller_targets[bank] - chiller_temp)  < 1:     #if the cell temp isn't reached, but the chiller temp has, then increase the chiller temp - needed due to heat loss to ambient
-                        avg_cell_temp = (min_cell_temp + max_cell_temp) / 2
-                        if avg_cell_temp < temp:
-                            temp_paddings[bank] = temp_paddings[bank] + 1
-                        elif avg_cell_temp > temp:
-                            temp_paddings[bank] = temp_paddings[bank] - 1
-                        chiller_targets[bank] = temp + temp_paddings[bank]
-                        print(f'changing bank {bank} chiller setpoint to {chiller_targets[bank]}') if verbose else None
-                    #keep resending the chiller target, in case the first transmission was lost
-                    print(f'setting chiller to {chiller_targets[bank]}degC') if verbose else None
-                    try:
-                        self.chiller_controller.set_temp(bank, chiller_targets[bank])
-                    except:
-                        self.send_email(f'{self.test_title} Test Aborted - Chiller Comms Failure.', f'Failed to set temperature on chiller for bank {bank} on port {self.chiller_controller.chillers.get(bank)}')
-                        raise RuntimeError(f'failed to set temperature on bank {bank} (port {self.chiller_controller.chillers.get(bank)})- aborting test')
+                for group in bank_groups.get(bank, []):
+                    if not temps_ok[(bank, group)]:  #if the cells haven't yet reached the required temp
+                        try:
+                            chiller_temp = self.chiller_controller.read_temp(bank, group=group)
+                        except Exception as e:
+                            port = self.chiller_controller.get_port(bank, group)
+                            self.send_email(f'{self.test_title} Test Aborted - Chiller Comms Failure.', f'Failed to read temperature on chiller for bank {bank} group {group} on port {port}')
+                            raise RuntimeError(f'failed to read temperature on bank {bank} group {group} (port {port})- aborting test')
+                        # filter channel data to this bank-group only
+                        chan_data = self.cycler.get_channels_current_data(self.bank_channels[bank])
+                        cell_temps = []
+                        for chan in chan_data:
+                            local = chan % 100
+                            belongs = (group == '1-4' and 1 <= local <= 4) or (group == '5-8' and 5 <= local <= 8)
+                            if belongs:
+                                cell_temps.append(float(chan.get('auxtemp')))
+                        if not cell_temps:
+                            # if no channels in this group are active, consider it OK
+                            temps_ok[(bank, group)] = True
+                            continue
+                        min_cell_temp = min(cell_temps)
+                        max_cell_temp = max(cell_temps)
+                        print(f'bank {bank} group {group} -- chiller temp: {chiller_temp}  |  min cell temp: {min_cell_temp}  |  max cell temp: {max_cell_temp}') if verbose else None
+                    
+                        if abs(temp - min_cell_temp) < temp_tolerance and abs(temp - max_cell_temp) < temp_tolerance:
+                            print(f'bank {bank} group {group} cell target temp reached: {min_cell_temp}degC') if verbose else None
+                            temps_ok[(bank, group)] = True
+                        elif abs(chiller_targets[(bank, group)] - chiller_temp)  < 1:     #if the cell temp isn't reached, but the chiller temp has, then increase the chiller temp - needed due to heat loss to ambient
+                            avg_cell_temp = (min_cell_temp + max_cell_temp) / 2
+                            if avg_cell_temp < temp:
+                                temp_paddings[(bank, group)] = temp_paddings[(bank, group)] + 1
+                            elif avg_cell_temp > temp:
+                                temp_paddings[(bank, group)] = temp_paddings[(bank, group)] - 1
+                            chiller_targets[(bank, group)] = temp + temp_paddings[(bank, group)]
+                            print(f'changing bank {bank} group {group} chiller setpoint to {chiller_targets[(bank, group)]}') if verbose else None
+                        #keep resending the chiller target, in case the first transmission was lost
+                        print(f'setting chiller to {chiller_targets[(bank, group)]}degC') if verbose else None
+                        try:
+                            self.chiller_controller.set_temp(bank, chiller_targets[(bank, group)], group=group)
+                        except Exception as e:
+                            port = self.chiller_controller.get_port(bank, group)
+                            self.send_email(f'{self.test_title} Test Aborted - Chiller Comms Failure.', f'Failed to set temperature on chiller for bank {bank} group {group} on port {port}')
+                            raise RuntimeError(f'failed to set temperature on bank {bank} group {group} (port {port})- aborting test')
             time.sleep(30)
 
     def start_tests(self, channels, profile, savepath, filenames, verbose=True):
