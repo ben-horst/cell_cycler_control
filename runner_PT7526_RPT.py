@@ -1,17 +1,18 @@
-import configs.PT5801 as CONFIG
+import configs.PT7526 as CONFIG
 from core.test_runner import TestRunner
-from core.cycle_manager_PT5801 import CycleManager
+#TODO: uncomment this when the cycle manager is updated
+from core.cycle_manager_PT7526 import CycleManager
 
-profile = "G:/My Drive/Cell Test Profiles/RPTs/P45_RPT_V1.2.xml"
-savepath = "G:/My Drive/Cell Test Data/PT5801/RPTs"
+profile = "G:/My Drive/Cell Test Profiles/RPTs/H52_RPT_V1.2.xml"
+savepath = "G:/My Drive/Cell Test Data/PT7526/RPTs"
 temps = [20, 35, 50]
-test_title = 'PT5801_RPTs'
+test_title = 'PT7526_RPTs'
 
-cqt_profile = "G:/My Drive/Cell Test Profiles/Utilities/CQT_P45B_1C_4C.xml"
-cqt_savepath = "G:/My Drive/Cell Test Data/PT5801/CQTs"
+cqt_profile = "G:/My Drive/Cell Test Profiles/Utilities/CQT_H52_1C_4C.xml"
+cqt_savepath = "G:/My Drive/Cell Test Data/PT7526/CQTs"
 cqt_temp = 25
 
-bank_request = input("Enter the banks for RPT execution, separated by commas, or enter 'ALL' to use all 6 banks: ")
+bank_request = input(f"Enter the banks for RPT execution, separated by commas, or enter 'ALL' to use all {len(CONFIG.AVAILABLE_BANKS)} banks ({', '.join(str(b) for b in CONFIG.AVAILABLE_BANKS)}): ")
 if bank_request == 'ALL':
     active_banks = CONFIG.AVAILABLE_BANKS
 else:
@@ -56,13 +57,19 @@ input('Press enter to continue with test execution.')
 test_runner = TestRunner(channels, test_title)
 barcodes = test_runner.barcodes
 
+# print a clear, aligned mapping so barcodes visibly match the filtered pairs
+print('\nSpecimen -> Channel -> Barcode:')
+chan_to_barcode = dict(zip(channels, barcodes))
+for ch, sp in pairs:
+    print(f'{sp}\t{ch}\t{chan_to_barcode.get(ch)}')
+
 #perform connection quality check
 print('Setting temperature for cell connection quality test...')
 test_runner.bring_all_cells_to_temp_and_block_until_complete(temp=cqt_temp, timeout_mins=30)
 test_runner.start_tests(channels, cqt_profile, cqt_savepath, filenames)
 test_runner.wait_for_all_channels_to_finish_and_block_until_complete(timeout_mins=4)  
 for specimen in specimens:
-   cycle_manager.update_cycle_tracker(specimen, 'CQT', increment=False)  #update cycle tracker
+    cycle_manager.update_cycle_tracker(specimen, 'CQT', increment=False)  #update cycle tracker
 #the above only passes if all cells reach the "finish" state within the timeout, otherwise the program rasies exception and exits
 
 #start all the RPTs
@@ -75,7 +82,7 @@ for temp in temps:
         cycle_manager.update_cycle_tracker(specimen, 'RPT', increment=False)  #update cycle tracker
 
 test_runner.send_email(f'{test_title} Test Complete',
-                       f'''All tests completed successfully for multitemp RPT for PT-5801.
+                       f'''All tests completed successfully for multitemp RPT for PT-7526.
                        \n\nRPT temperatures: {temps} degC
                        \n\nBanks tested: {active_banks}
                        \n\nSpecimens tested: {specimens}
