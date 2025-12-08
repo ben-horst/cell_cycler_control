@@ -178,7 +178,7 @@ new_params = mat_extractor.build_params_dict()
 
 type = input('Input either CYC or OCV to generate cycle profiles or OCV extraction profiles: ')
 if type == 'CYC':
-    base_file_path = "G:/My Drive/Cell Test Profiles/Cycles/PT7526_base_profiles"
+    base_file_path = "G:/My Drive/Cell Test Profiles/Cycles/PT5801_base_profiles"
     output_file_path = "G:/My Drive/Cell Test Profiles/Cycles/PT7526_tuned_profiles"
     build_new_profiles(new_params, base_file_path, output_file_path)
 elif type == 'OCV':
