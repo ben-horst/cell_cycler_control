@@ -4,6 +4,7 @@ import scipy.io
 import shutil
 import os
 from datetime import datetime
+import json
 from core.xml_editor import ProfileEditor
 import tkinter as tk
 from tkinter import filedialog
@@ -175,6 +176,22 @@ if not mat_file:
 
 mat_extractor = MatExtractor(mat_file)
 new_params = mat_extractor.build_params_dict()
+
+# save parameters to JSON for record-keeping/inspection
+params_output_dir = "G:/My Drive/Cell Test Data/PT7526/Parameters"
+os.makedirs(params_output_dir, exist_ok=True)
+stamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+params_output_path = os.path.join(params_output_dir, f"parameters_{stamp}.json")
+# ensure JSON-serializable values
+serializable_params = {
+    sid: {
+        'cutoff_current': float(vals['cutoff_current']),
+        'cell_capacity': float(vals['cell_capacity'])
+    } for sid, vals in new_params.items()
+}
+with open(params_output_path, 'w', encoding='utf-8') as f:
+    json.dump(serializable_params, f, indent=4)
+print(f"Saved parameter JSON to: {params_output_path}")
 
 type = input('Input either CYC or OCV to generate cycle profiles or OCV extraction profiles: ')
 if type == 'CYC':
