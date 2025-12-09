@@ -81,6 +81,10 @@ for temp in temps:
     for specimen in specimens:
         cycle_manager.update_cycle_tracker(specimen, 'RPT', increment=False)  #update cycle tracker
 
+# cool down chiller at end of RPTs
+print('Setting temperature to 30C at end of RPTs...')
+test_runner.bring_all_cells_to_temp_and_block_until_complete(temp=30, timeout_mins=30)
+
 test_runner.send_email(f'{test_title} Test Complete',
                        f'''All tests completed successfully for multitemp RPT for PT-7526.
                        \n\nRPT temperatures: {temps} degC
