@@ -1,7 +1,6 @@
 
 import pandas as pd
 import scipy.io
-import numpy as np
 import shutil
 import os
 from datetime import datetime
@@ -17,69 +16,47 @@ class MatExtractor:
         self.data = self.build_data()
 
     def build_data(self):
-        # loads a .mat file at the specified path and returns a pandas dataframe with the data in usable form
-        mat_contents = scipy.io.loadmat(self.file_path)
+        #loads a .mat file at the specified path and returns a pandas dataframe with the data in usable form
 
-        keys = [k for k in mat_contents.keys() if not k.startswith('__')]
+        # Load the .mat file with squeeze to simplify shapes and structs
+        mat_contents = scipy.io.loadmat(self.file_path, squeeze_me=True, struct_as_record=False)
 
-        def _first_present(candidates):
-            for k in candidates:
-                if k in mat_contents:
-                    return k
-            return None
-
-        # Resolve matrix key robustly
-        data_key = _first_present(['data', 'Data', 'X', 'Xdata', 'data_array', 'dataset', 'values'])
-        if data_key is None:
-            numeric_arrays = [
-                (k, v) for k, v in ((k, mat_contents[k]) for k in keys)
-                if isinstance(v, np.ndarray) and v.dtype.kind in {'i', 'u', 'f'} and v.ndim in (2, 3)
-            ]
-            if not numeric_arrays:
-                raise ValueError(f"Could not locate a numeric 2D/3D data matrix in .mat. Available keys: {keys}")
-            data_key = max(numeric_arrays, key=lambda kv: kv[1].size)[0]
-
-        raw_matrix = mat_contents[data_key]
-        if raw_matrix.ndim == 3:
-            vals = raw_matrix[:, :, -1]
-        elif raw_matrix.ndim == 2:
-            vals = raw_matrix
+        # Some files wrap values in a top-level 'output' struct
+        container = mat_contents.get('output', None)
+        if container is None:
+            # Fall back to top-level variables matching PT5801 schema
+            if 'data' not in mat_contents or 'column_names' not in mat_contents or 'test_conditions' not in mat_contents:
+                raise ValueError("Could not find expected variables: either 'output' struct or top-level 'data', 'column_names', 'test_conditions'.")
+            vals = mat_contents['data']
+            column_names = mat_contents['column_names']
+            specimen_ids = mat_contents['test_conditions']
         else:
-            raise ValueError(f"Unsupported data array rank {raw_matrix.ndim}; expected 2D or 3D.")
+            # Extract from struct attributes
+            try:
+                vals = container.data
+                column_names = container.column_names
+                specimen_ids = container.test_conditions
+            except AttributeError:
+                raise ValueError("The 'output' struct is missing one of: data, column_names, test_conditions.")
 
-        # Resolve column names
-        col_key = _first_present(['column_names', 'columns', 'colnames', 'vars', 'variable', 'varnames'])
-        if col_key is None:
-            raise ValueError(f"Could not find column names in .mat. Available keys: {keys}")
-        raw_cols = mat_contents[col_key]
-        flat_cols = np.ravel(raw_cols)
-        column_names = []
-        for item in flat_cols:
-            if isinstance(item, bytes):
-                s = item.decode(errors='ignore')
-            elif isinstance(item, np.ndarray):
-                s = str(item.tolist())
-            else:
-                s = str(item)
-            column_names.append('capacity' if s == '0' else s)
+        # If vals is 3D, use last slice; if 2D, use as-is
+        if hasattr(vals, 'ndim') and vals.ndim == 3:
+            vals = vals[:, :, -1]
+        elif hasattr(vals, 'ndim') and vals.ndim == 2:
+            vals = vals
+        else:
+            raise ValueError('.mat file not correct dimensions for data (expected 2D or 3D array).')
 
-        # Resolve specimen ids
-        id_key = _first_present(['test_conditions', 'specimen_ids', 'specimens', 'ids', 'cell_ids', 'samples'])
-        if id_key is None:
-            raise ValueError(f"Could not find specimen identifiers in .mat. Available keys: {keys}")
-        raw_ids = mat_contents[id_key]
-        specimen_ids = [str(x[0]) if isinstance(x, np.ndarray) else str(x) for x in np.ravel(raw_ids)]
-        specimen_ids = [sid.replace('xx', '') for sid in specimen_ids]
+        # Column names: flatten and coerce, replace 0 with 'capacity'
+        column_names = [ ('capacity' if name == 0 else name) for name in list(column_names.flatten()) ]
 
-        # Validate shapes
-        if len(column_names) != vals.shape[1]:
-            raise ValueError(f"Column count mismatch: {len(column_names)} names vs data has {vals.shape[1]} columns. Columns: {column_names}")
-        if len(specimen_ids) != vals.shape[0]:
-            raise ValueError(f"Specimen ID count {len(specimen_ids)} does not match data rows {vals.shape[0]}.")
+        # Specimen ids: flatten and strip any leading 'xx'
+        specimen_ids = [ sid.replace('xx', '') for sid in list(specimen_ids.flatten()) ]
 
-        # Build dataframe
+        #build dataframe and add specimen_id
         data = pd.DataFrame(vals, columns=column_names)
         data.insert(0, 'specimen_id', specimen_ids)
+
         return data
 
     def get_cutoff_current(self, spec_id, temp):
