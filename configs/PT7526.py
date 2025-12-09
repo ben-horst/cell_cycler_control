@@ -21,8 +21,8 @@ BASE_CHARGE_PROFILES = {  # map of base profiles to use for each pair of specime
     'E1R2': {'FC': '2C2_charge_60_knee',                   'SC': 'recovery_charge'},
     'E2R1': {'FC': '3C0_charge_60_knee',                   'SC': 'recovery_charge'},
     'E2R2': {'FC': '3C0_charge_60_knee',                   'SC': 'recovery_charge'},
-    'E3R1': {'FC': '2C2_charge_60_knee_ext_range',         'SC': 'recovery_charge'},
-    'E3R2': {'FC': '2C2_charge_60_knee_ext_range',         'SC': 'recovery_charge'},
+    'E3R1': {'FC': '2C2_charge_60_knee',                   'SC': 'recovery_charge'},
+    'E3R2': {'FC': '2C2_charge_60_knee',                   'SC': 'recovery_charge'},
     'E4R1': {'FC': '2C2_charge_60_knee',                   'SC': 'recovery_charge'},
     'E4R2': {'FC': '2C2_charge_60_knee',                   'SC': 'recovery_charge'}
 }
